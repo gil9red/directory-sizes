@@ -20,7 +20,7 @@ import sys
 import directory_sizes
 
 
-# def dir_size_bytes(dir_path, root_item, files=0, dirs=0, level=0, do_indent=True, size_less=directory_sizes.get_bytes('1 GB')):
+# def dir_size_bytes(dir_path, root_item, files=0, dirs=0, level=0, do_indent=True, min_size=directory_sizes.get_bytes('1 GB')):
 #     it = QDirIterator(dir_path, '*.*', QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System)
 #
 #     sizes = 0
@@ -36,7 +36,7 @@ import directory_sizes
 #             # root_item.appendRow(row)
 #
 #             dirs += 1
-#             size, files, dirs = dir_size_bytes(file_name, row[0], files, dirs, level + 1, do_indent, size_less)
+#             size, files, dirs = dir_size_bytes(file_name, row[0], files, dirs, level + 1, do_indent, min_size)
 #
 #             # row[1].setText(dirs_sizes.pretty_file_size(size)[1])
 #         else:
@@ -47,7 +47,7 @@ import directory_sizes
 #
 #         qApp.processEvents()
 #
-#     if sizes >= size_less:
+#     if sizes >= min_size:
 #         root_item.appendRow(row)
 #         row[1].setText(directory_sizes.pretty_file_size(sizes)[1])
 #
@@ -78,9 +78,7 @@ class MainWindow(QMainWindow):
             self.ui.menuTools.addAction(tool.toggleViewAction())
 
         self.model = QStandardItemModel()
-        header_labels = ['Name', 'Size']
-        self.model.setColumnCount(len(header_labels))
-        self.model.setHorizontalHeaderLabels(header_labels)
+        self.clear_model()
 
     # # for drive in QDir.drives():
     # #     drive_name = drive.path()
@@ -94,19 +92,82 @@ class MainWindow(QMainWindow):
 
         self.ui.treeView.setModel(self.model)
 
-    def fill(self):
-        # sizes, files, dirs = self.dir_size_bytes(r'C:\\', self.model.invisibleRootItem())
-        self.dir_size_bytes(r'C:\Program Files (x86)', self.model.invisibleRootItem())
-        # self.dir_size_bytes(r'C:\Users\ipetrash\Desktop\PyScripts', self.model.invisibleRootItem(), size_less=directory_sizes.get_bytes('50 MB'))
+        # self.ui.treeView.activated.connect(lambda index: self.ui.statusbar.showMessage(self.model.data(index)))
+        # self.ui.treeView.clicked.connect(lambda index: self.ui.statusbar.showMessage(self.model.data(index)))
+        self.ui.treeView.clicked.connect(self.show_info_in_status_bar)
+        # self.ui.treeView.activated.connect(lambda index: self.ui.statusbar.showMessage(str(index)))
+        # self.ui.treeView.clicked.connect(lambda index: self.ui.statusbar.showMessage(str(index)))
+        #
+        # self.ui.statusbar.showMessage('dfdfdf')
 
+        self.ui.button_select_dir.clicked.connect(self.select_dir)
+        self.ui.action_go.triggered.connect(self.fill)
+
+        self.ui.label_root_dir.setText(self.ui.line_edit_dir_path.text())
+
+        self.read_settings()
+
+    def select_dir(self):
+        dir_path = QFileDialog.getExistingDirectory(self)
+        if dir_path:
+            self.ui.line_edit_dir_path.setText(dir_path)
+
+    def show_info_in_status_bar(self, index):
+        if index is None or not index.isValid:
+            logger.warn('show_info_in_status_bar: invalid index: %s.', index)
+            return
+
+        row = index.row()
+
+        parent = self.model.itemFromIndex(index).parent()
+        if parent is not None:
+            path, size = parent.child(row, 0), parent.child(row, 1)
+        else:
+            path, size = self.model.item(row, 0), self.model.item(row, 1)
+
+        # self.ui.statusbar.showMessage('{} ({})'.format(path.text(), size.text()))
+        self.ui.statusbar.showMessage('{} ({})'.format(path.data(Qt.UserRole + 1), size.data(Qt.UserRole + 1)))
+
+    def clear_model(self):
+        self.model.clear()
+        header_labels = ['Name', 'Size']
+        self.model.setColumnCount(len(header_labels))
+        self.model.setHorizontalHeaderLabels(header_labels)
+
+    def fill(self):
+        self.clear_model()
+
+        dir_path = self.ui.line_edit_dir_path.text()
+        if not dir_path or not os.path.exists(dir_path):
+            QMessageBox.information(self, 'Info', 'Choose dir path!')
+            return
+
+        min_size = self.ui.line_edit_less_min_size.text()
+        if not min_size:
+            logger.debug('min_size is empty. Setting default min size.')
+            min_size = directory_sizes.get_bytes('1 GB')
+            logger.debug('min_size: %s.', min_size)
+        
+        self.dir_size_bytes(dir_path, self.model.invisibleRootItem(), min_size=directory_sizes.get_bytes(min_size))
+        
+        # # sizes, files, dirs = self.dir_size_bytes(r'C:\\', self.model.invisibleRootItem())
+        # self.dir_size_bytes(r'C:\Program Files (x86)\R.G. Mechanics\Lost Planet - Colonies', self.model.invisibleRootItem())
+        # # self.dir_size_bytes(r'C:\Users\ipetrash\Desktop\PyScripts', self.model.invisibleRootItem(), min_size=directory_sizes.get_bytes('50 MB'))
+
+        self.ui.treeView.expandAll()
+        self.ui.treeView.resizeColumnToContents(0)
         QMessageBox.information(self, 'Info', 'Done!')
 
-    def dir_size_bytes(self, dir_path, root_item, files=0, dirs=0, level=0, do_indent=True, size_less=directory_sizes.get_bytes('1 GB')):
+    def dir_size_bytes(self, dir_path, root_item, files=0, dirs=0, level=0, do_indent=True, min_size=directory_sizes.get_bytes('1 GB')):
         it = QDirIterator(dir_path, '*.*', QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System)
 
         sizes = 0
 
-        row = [QStandardItem(os.path.normpath(dir_path)), QStandardItem('-')]
+        path_short_name = os.path.split(dir_path)
+        path_short_name = path_short_name[1] if path_short_name[1] else path_short_name[0]
+        row = [QStandardItem(path_short_name), QStandardItem('-')]
+
+        # row = [QStandardItem(os.path.normpath(dir_path)), QStandardItem('-')]
 
         while it.hasNext():
             file_name = it.next()
@@ -117,7 +178,7 @@ class MainWindow(QMainWindow):
                 # root_item.appendRow(row)
 
                 dirs += 1
-                size, files, dirs = self.dir_size_bytes(file_name, row[0], files, dirs, level + 1, do_indent, size_less)
+                size, files, dirs = self.dir_size_bytes(file_name, row[0], files, dirs, level + 1, do_indent, min_size)
 
                 # row[1].setText(dirs_sizes.pretty_file_size(size)[1])
             else:
@@ -128,9 +189,32 @@ class MainWindow(QMainWindow):
 
             qApp.processEvents()
 
-        if sizes >= size_less:
+        if sizes >= min_size:
             root_item.appendRow(row)
-            row[1].setText(directory_sizes.pretty_file_size(sizes)[1])
+
+            text_size = directory_sizes.pretty_file_size(sizes)[1]
+
+            row[0].setData(dir_path)
+            row[1].setText(text_size)
+            row[1].setData(text_size)
+
+            # row[0].setToolTip(dir_path)
+            # row[1].setToolTip(text_size)
+            #
+            # row[0].setStatusTip(dir_path)
+            # row[1].setStatusTip(text_size)
+
+            row[0].setEditable(False)
+            row[1].setEditable(False)
+
+            # for item in row:
+            #     item.setData(item.text(), Qt.UserRole + 1)
+
+            # row[0].setToolTip(row[0].text())
+            # row[1].setToolTip(row[1].text())
+
+            # row[0].setStatusTip(row[0].text())
+            # row[1].setStatusTip(row[1].text())
 
             # row[1].setText(dirs_sizes.pretty_file_size(sizes)[1])
             # root_item.appendRow(row)
