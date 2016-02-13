@@ -64,6 +64,8 @@ class MainWindow(QMainWindow):
                 return
 
         row = self.get_row_item_from_index(index)
+        if row is None:
+            return
 
         # TODO: Qt.UserRole + 1
         path = row[0].data(Qt.UserRole + 1)
