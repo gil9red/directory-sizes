@@ -86,7 +86,11 @@ class MainWindow(QMainWindow):
 
         row = index.row()
 
-        parent = self.model.itemFromIndex(index).parent()
+        item = self.model.itemFromIndex(index)
+        if item is None:
+            return
+
+        parent = item.parent()
         if parent is None:
             parent = self.model.invisibleRootItem()
 
