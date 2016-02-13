@@ -19,6 +19,8 @@ import sys
 
 import directory_sizes
 
+# TODO: enabled show_in_explorer on active item
+
 
 # def dir_size_bytes(dir_path, root_item, files=0, dirs=0, level=0, do_indent=True, min_size=directory_sizes.get_bytes('1 GB')):
 #     it = QDirIterator(dir_path, '*.*', QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System)
@@ -99,33 +101,81 @@ class MainWindow(QMainWindow):
         # self.ui.treeView.clicked.connect(lambda index: self.ui.statusbar.showMessage(str(index)))
         #
         # self.ui.statusbar.showMessage('dfdfdf')
+        self.ui.treeView.doubleClicked.connect(self.show_in_explorer)
 
         self.ui.button_select_dir.clicked.connect(self.select_dir)
         self.ui.action_go.triggered.connect(self.fill)
+        self.ui.action_show_in_explorer.triggered.connect(self.show_in_explorer)
 
         self.ui.label_root_dir.setText(self.ui.line_edit_dir_path.text())
 
         self.read_settings()
 
+    def update_states(self):
+        pass
+
+    def show_in_explorer(self, index=None):
+        if index is None:
+            index = self.ui.treeView.currentIndex()
+            if index is None:
+                return
+
+        row = self.get_row_item_from_index(index)
+
+        # TODO: Qt.UserRole + 1
+        path = row[0].data(Qt.UserRole + 1)
+
+        cmd = 'Explorer /n,"{}"'.format(path)
+        logger.debug('Command: %s.', cmd)
+
+        os.system(cmd)
+
     def select_dir(self):
         dir_path = QFileDialog.getExistingDirectory(self)
         if dir_path:
+            # dir_path = os.path.normpath(dir_path)
             self.ui.line_edit_dir_path.setText(dir_path)
 
-    def show_info_in_status_bar(self, index):
+    def get_row_item_from_index(self, index):
         if index is None or not index.isValid:
-            logger.warn('show_info_in_status_bar: invalid index: %s.', index)
+            logger.warn('get_row_from_index: invalid index: %s.', index)
             return
 
         row = index.row()
 
         parent = self.model.itemFromIndex(index).parent()
-        if parent is not None:
-            path, size = parent.child(row, 0), parent.child(row, 1)
-        else:
-            path, size = self.model.item(row, 0), self.model.item(row, 1)
+        if parent is None:
+            parent = self.model.invisibleRootItem()
 
-        # self.ui.statusbar.showMessage('{} ({})'.format(path.text(), size.text()))
+        return [parent.child(row, i) for i in range(self.model.columnCount())]
+
+    def show_info_in_status_bar(self, index):
+        # if index is None or not index.isValid:
+        #     logger.warn('show_info_in_status_bar: invalid index: %s.', index)
+        #     return
+        #
+        # row = index.row()
+        #
+        # parent = self.model.itemFromIndex(index).parent()
+        # # if parent is not None:
+        # #     path, size = parent.child(row, 0), parent.child(row, 1)
+        # # else:
+        # #     path, size = self.model.item(row, 0), self.model.item(row, 1)
+        # if parent is None:
+        #     parent = self.model.invisibleRootItem()
+        #
+        # path, size = parent.child(row, 0), parent.child(row, 1)
+        #
+        # # self.ui.statusbar.showMessage('{} ({})'.format(path.text(), size.text()))
+        # self.ui.statusbar.showMessage('{} ({})'.format(path.data(Qt.UserRole + 1), size.data(Qt.UserRole + 1)))
+
+        row = self.get_row_item_from_index(index)
+        if row is None:
+            return
+
+        path, size = row
+
+        # TODO: Qt.UserRole + 1
         self.ui.statusbar.showMessage('{} ({})'.format(path.data(Qt.UserRole + 1), size.data(Qt.UserRole + 1)))
 
     def clear_model(self):
@@ -159,6 +209,8 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, 'Info', 'Done!')
 
     def dir_size_bytes(self, dir_path, root_item, files=0, dirs=0, level=0, do_indent=True, min_size=directory_sizes.get_bytes('1 GB')):
+        dir_path = QDir.toNativeSeparators(dir_path)
+
         it = QDirIterator(dir_path, '*.*', QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System)
 
         sizes = 0
@@ -219,7 +271,8 @@ class MainWindow(QMainWindow):
             # row[1].setText(dirs_sizes.pretty_file_size(sizes)[1])
             # root_item.appendRow(row)
 
-            dir_info = os.path.normpath(dir_path) + ' ' + '{1} ({0} bytes)'.format(*directory_sizes.pretty_file_size(sizes))
+            # dir_info = os.path.normpath(dir_path) + ' ' + '{1} ({0} bytes)'.format(*directory_sizes.pretty_file_size(sizes))
+            dir_info = dir_path + ' ' + '{1} ({0} bytes)'.format(*directory_sizes.pretty_file_size(sizes))
             logger.debug(
                 ((' ' * 4 * level) if do_indent else '') + dir_info
             )
