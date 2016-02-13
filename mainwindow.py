@@ -21,6 +21,8 @@ logger = get_logger('directory_sizes_gui')
 # TODO: enabled show_in_explorer on active item
 # TODO: memory dockwidget settings
 # TODO: fill tree during search
+# TODO: более сложный поиск:  возможность указать больше, меньше, равно указанному размеру, а также
+# диавпазон
 
 
 class MainWindow(QMainWindow):
