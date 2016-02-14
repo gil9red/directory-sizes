@@ -23,6 +23,7 @@ logger = get_logger('directory_sizes_gui')
 # TODO: fill tree during search
 # TODO: более сложный поиск:  возможность указать больше, меньше, равно указанному размеру, а также
 # диавпазон
+# TODO: Для условия сравнения размеров использовать eval
 
 
 class MainWindow(QMainWindow):
