@@ -135,6 +135,8 @@ class MainWindow(QMainWindow):
 
         self.ui.treeView.expandAll()
         self.ui.treeView.resizeColumnToContents(0)
+
+        # TODO: показывать время выполнения поиска
         QMessageBox.information(self, 'Info', 'Done!')
 
     def dir_size_bytes(self, dir_path, root_item, files=0, dirs=0, level=0, do_indent=True, min_size=directory_sizes.get_bytes('1 GB')):
