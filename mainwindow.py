@@ -5,6 +5,7 @@ __author__ = 'ipetrash'
 
 
 import os.path
+import time
 
 from PySide.QtGui import *
 from PySide.QtCore import *
@@ -130,14 +131,18 @@ class MainWindow(QMainWindow):
             logger.debug('min_size is empty. Setting default min size.')
             min_size = directory_sizes.get_bytes('1 GB')
             logger.debug('min_size: %s.', min_size)
-        
+
+        t = time.clock()
+
         self.dir_size_bytes(dir_path, self.model.invisibleRootItem(), min_size=directory_sizes.get_bytes(min_size))
+
+        t2 = time.clock() - t
+        logger.debug('Done! Elapsed time {:.2f} sec.'.format(t2))
 
         self.ui.treeView.expandAll()
         self.ui.treeView.resizeColumnToContents(0)
 
-        # TODO: показывать время выполнения поиска
-        QMessageBox.information(self, 'Info', 'Done!')
+        QMessageBox.information(self, 'Info', 'Done!\n\nElapsed time {:.2f} sec.'.format(t2))
 
     def dir_size_bytes(self, dir_path, root_item, files=0, dirs=0, level=0, do_indent=True, min_size=directory_sizes.get_bytes('1 GB')):
         dir_path = QDir.toNativeSeparators(dir_path)
