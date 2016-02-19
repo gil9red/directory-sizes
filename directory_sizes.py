@@ -58,7 +58,8 @@ def get_bytes(text, units='BKMGTPE'):
         pass
 
     # For '54,7GB' -> num='54,7' and unit='G'
-    num, unit = float(text[:-2]), text[-1:]
+    num, unit = float(text[:-1]), text[-1:]
+
     # assert len(unit) == 1, 'Len unit should == 1, example G, M. Unit = {}. Text={}.'.format(unit, text)
     assert unit in units, 'Unknown unit {}, possible: {}. Text={}.'.format(unit, ', '.join(tuple(units)), text)
 
@@ -79,7 +80,10 @@ def pretty_file_size(n_size):
     return n_size, '{:.2f}'.format(size) + ' ' + "BKMGTPE"[i] + ('B' if i > 0 else ' ')
 
 
-def dir_size_bytes(dir_path, files=0, dirs=0, level=0, do_indent=True, size_less=get_bytes('1 GB')):
+def dir_size_bytes(dir_path, files=0, dirs=0, level=0, do_indent=True, size_less=None):
+    if size_less is None:
+        size_less = get_bytes('1 GB')
+
     it = QDirIterator(dir_path, '*.*', QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System)
 
     sizes = 0
