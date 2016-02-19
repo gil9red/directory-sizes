@@ -21,9 +21,9 @@ logger = get_logger('directory_sizes_gui')
 
 
 # TODO: enabled show_in_explorer on active item
-# TODO: fill tree during search
 # TODO: проверка на исключения: должны ловиться в любом месте и показываться в статус баре по кнопке и
 # в messagebox'е (как в tx)
+# TODO: action expandall and collapseall
 
 
 def check_filter_size_eval(pattern, size):
@@ -75,7 +75,7 @@ class MainWindow(QMainWindow):
         self.ui.button_select_dir.clicked.connect(self.select_dir)
         self.ui.action_go.triggered.connect(self.fill)
         self.ui.action_show_in_explorer.triggered.connect(self.show_in_explorer)
-
+        self.ui.action_apply_filter.triggered.connect(self.slot_remove_dirs)
         self.ui.label_root_dir.setText(self.ui.line_edit_dir_path.text())
 
         self.read_settings()
@@ -130,14 +130,37 @@ class MainWindow(QMainWindow):
 
         path, size = row
 
-        # TODO: Qt.UserRole + 1
-        self.ui.statusbar.showMessage('{} ({})'.format(path.data(Qt.UserRole + 1), size.data(Qt.UserRole + 1)))
+        # TODO: Qt.UserRole + 1 / Qt.UserRole + 2
+        # TODO: Проверять: size.data(Qt.UserRole + 1) != size.data(Qt.UserRole + 2)
+        # self.ui.statusbar.showMessage('{} ({} / {} bytes)'.format(
+        #     path.data(Qt.UserRole + 1),
+        #     size.data(Qt.UserRole + 1),
+        #     size.data(Qt.UserRole + 2)))
+
+        self.ui.statusbar.showMessage('{} ({} / {} bytes)'.format(
+            path.data(Qt.UserRole + 1),
+            size.data(Qt.UserRole + 1),
+            size.data(Qt.UserRole + 2)))
 
     def clear_model(self):
         self.model.clear()
         header_labels = ['Name', 'Size']
         self.model.setColumnCount(len(header_labels))
         self.model.setHorizontalHeaderLabels(header_labels)
+
+    def remove_dirs(self, root):
+        """Удаление элементов, у которых размер не совпадает с фильтром"""
+
+        for row in reversed(range(root.rowCount())):
+            child = root.child(row, 1)
+            filter_size = self.ui.line_edit_filter_size.text()
+            if not check_filter_size_eval(filter_size, directory_sizes.get_bytes(child.data(Qt.UserRole + 1))):
+                root.removeRow(child.row())
+            else:
+                self.remove_dirs(root.child(row, 0))
+
+    def slot_remove_dirs(self):
+        self.remove_dirs(self.model.invisibleRootItem())
 
     def fill(self):
         self.clear_model()
@@ -156,34 +179,22 @@ class MainWindow(QMainWindow):
         t = time.clock()
 
         # Соберем список папок
-        for entry in [os.path.join(dir_path, entry)
-                      for entry in os.listdir(dir_path)
-                      if os.path.isdir(os.path.join(dir_path, entry))]:
-            self.dir_size_bytes(entry, self.model.invisibleRootItem(), filter_size=filter_size)
+        dir_list = [os.path.join(dir_path, entry)
+                    for entry in os.listdir(dir_path)
+                    if os.path.isdir(os.path.join(dir_path, entry))]
 
-        # self.dir_size_bytes(dir_path, self.model.invisibleRootItem(), filter_size=filter_size)
+        for entry in dir_list:
+            self.dir_size_bytes(entry, self.model.invisibleRootItem(), filter_size)
 
-        # Удаление элементов, у которых размер не совпадает с фильтром
-        root = self.model.invisibleRootItem()
-        for row in reversed(range(root.rowCount())):
-            child = root.child(row, 1)
-            if child.text() in '-':
-                root.removeRow(row)
-            else:
-                self.ui.treeView.setExpanded(child.index(), True)
+        if self.ui.check_box_auto_apply_filter.isChecked():
+            self.slot_remove_dirs()
 
         t2 = time.clock() - t
         logger.debug('Done! Elapsed time {:.2f} sec.'.format(t2))
-        logger.debug('Root rows: %s.', self.model.invisibleRootItem().rowCount())
-        # quit()
-
-        # self.ui.treeView.expandAll()
-        # self.ui.treeView.resizeColumnToContents(0)
 
         QMessageBox.information(self, 'Info', 'Done!\n\nElapsed time {:.2f} sec.'.format(t2))
 
-    def dir_size_bytes(self, dir_path, root_item, files=0, dirs=0, level=0,
-                       do_indent=True, filter_size="{size} >= %1GB%"):
+    def dir_size_bytes(self, dir_path, root_item, filter_size, level=0):
         dir_path = QDir.toNativeSeparators(dir_path)
 
         it = QDirIterator(dir_path, '*.*', QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System)
@@ -208,33 +219,20 @@ class MainWindow(QMainWindow):
             file = QFileInfo(file_name)
 
             if file.isDir():
-                dirs += 1
-                size, files, dirs = self.dir_size_bytes(file_name, row[0], files, dirs, level + 1,
-                                                        do_indent, filter_size)
+                size = self.dir_size_bytes(file_name, row[0], filter_size, level + 1)
             else:
-                files += 1
                 size = file.size()
 
             sizes += size
 
             qApp.processEvents()
 
-        if check_filter_size_eval(filter_size, sizes):
-            # root_item.appendRow(row)
+        text_size = directory_sizes.pretty_file_size(sizes)[1]
+        row[1].setText(text_size)
+        row[1].setData(text_size)
+        row[1].setData(str(sizes), Qt.UserRole + 2)
 
-            text_size = directory_sizes.pretty_file_size(sizes)[1]
-
-            row[1].setText(text_size)
-            row[1].setData(text_size)
-
-            dir_info = dir_path + ' ' + '{1} ({0} bytes)'.format(*directory_sizes.pretty_file_size(sizes))
-            logger.debug(
-                ((' ' * 4 * level) if do_indent else '') + dir_info
-            )
-
-            self.ui.textEdit.append(dir_info)
-
-        return sizes, files, dirs
+        return sizes
 
     def read_settings(self):
         # TODO: при сложных настройках, лучше перейти на json или yaml
@@ -252,6 +250,9 @@ class MainWindow(QMainWindow):
             filter_size = "{size} >= %1GB%"
         self.ui.line_edit_filter_size.setText(filter_size)
 
+        print(config.value('Auto_apply_filter', True))
+        self.ui.check_box_auto_apply_filter.setChecked('true' in config.value('Auto_apply_filter', 'true').lower())
+
     def write_settings(self):
         config = QSettings(CONFIG_FILE, QSettings.IniFormat)
         config.setValue('MainWindow_State', self.saveState())
@@ -259,6 +260,8 @@ class MainWindow(QMainWindow):
 
         config.setValue('Dir_path', self.ui.line_edit_dir_path.text())
         config.setValue('Filter_size', self.ui.line_edit_filter_size.text())
+
+        config.setValue('Auto_apply_filter', 'true' if self.ui.check_box_auto_apply_filter.isChecked() else 'false')
 
     def closeEvent(self, event):
         self.write_settings()

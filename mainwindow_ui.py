@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Fri Feb 19 11:43:10 2016
+# Created: Fri Feb 19 15:10:38 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -68,27 +68,27 @@ class Ui_MainWindow(object):
         self.line_edit_filter_size = QtGui.QLineEdit(self.dockWidgetContents_3)
         self.line_edit_filter_size.setObjectName("line_edit_filter_size")
         self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.line_edit_filter_size)
+        self.label_2 = QtGui.QLabel(self.dockWidgetContents_3)
+        self.label_2.setObjectName("label_2")
+        self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_2)
+        self.check_box_auto_apply_filter = QtGui.QCheckBox(self.dockWidgetContents_3)
+        self.check_box_auto_apply_filter.setText("")
+        self.check_box_auto_apply_filter.setChecked(True)
+        self.check_box_auto_apply_filter.setObjectName("check_box_auto_apply_filter")
+        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.check_box_auto_apply_filter)
         self.verticalLayout_3.addLayout(self.formLayout)
         self.dockWidgetSettings.setWidget(self.dockWidgetContents_3)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.dockWidgetSettings)
-        self.dockWidgetLog = QtGui.QDockWidget(MainWindow)
-        self.dockWidgetLog.setObjectName("dockWidgetLog")
-        self.dockWidgetContents = QtGui.QWidget()
-        self.dockWidgetContents.setObjectName("dockWidgetContents")
-        self.verticalLayout_2 = QtGui.QVBoxLayout(self.dockWidgetContents)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.textEdit = QtGui.QTextEdit(self.dockWidgetContents)
-        self.textEdit.setObjectName("textEdit")
-        self.verticalLayout_2.addWidget(self.textEdit)
-        self.dockWidgetLog.setWidget(self.dockWidgetContents)
-        MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.dockWidgetLog)
         self.action_go = QtGui.QAction(MainWindow)
         self.action_go.setObjectName("action_go")
         self.action_show_in_explorer = QtGui.QAction(MainWindow)
         self.action_show_in_explorer.setObjectName("action_show_in_explorer")
+        self.action_apply_filter = QtGui.QAction(MainWindow)
+        self.action_apply_filter.setObjectName("action_apply_filter")
         self.menubar.addAction(self.menuDockWindow.menuAction())
         self.menubar.addAction(self.menuTools.menuAction())
         self.toolBarGeneral.addAction(self.action_go)
+        self.toolBarGeneral.addAction(self.action_apply_filter)
         self.toolBarGeneral.addAction(self.action_show_in_explorer)
 
         self.retranslateUi(MainWindow)
@@ -108,9 +108,10 @@ class Ui_MainWindow(object):
         self.label_min_size.setText(QtGui.QApplication.translate("MainWindow", "Filter size:", None, QtGui.QApplication.UnicodeUTF8))
         self.line_edit_filter_size.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p>Пример: {size} &gt;= %1GB% and {size} &lt;= %3GB%</p><p>size: размер папок в байтах, который будет подставляться в {size}</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.line_edit_filter_size.setText(QtGui.QApplication.translate("MainWindow", "{size} >= %1GB%", None, QtGui.QApplication.UnicodeUTF8))
-        self.dockWidgetLog.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Log", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Auto apply filter", None, QtGui.QApplication.UnicodeUTF8))
         self.action_go.setText(QtGui.QApplication.translate("MainWindow", "Go", None, QtGui.QApplication.UnicodeUTF8))
         self.action_go.setToolTip(QtGui.QApplication.translate("MainWindow", "Go", None, QtGui.QApplication.UnicodeUTF8))
         self.action_show_in_explorer.setText(QtGui.QApplication.translate("MainWindow", "Show in Explorer", None, QtGui.QApplication.UnicodeUTF8))
         self.action_show_in_explorer.setToolTip(QtGui.QApplication.translate("MainWindow", "Show in Explorer", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_apply_filter.setText(QtGui.QApplication.translate("MainWindow", "Apply Filter", None, QtGui.QApplication.UnicodeUTF8))
 

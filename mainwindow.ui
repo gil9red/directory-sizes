@@ -65,6 +65,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="action_go"/>
+   <addaction name="action_apply_filter"/>
    <addaction name="action_show_in_explorer"/>
   </widget>
   <widget class="QDockWidget" name="dockWidgetSettings">
@@ -129,22 +130,24 @@
          </property>
         </widget>
        </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Auto apply filter</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QCheckBox" name="check_box_auto_apply_filter">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
       </layout>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="dockWidgetLog">
-   <property name="windowTitle">
-    <string>Log</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <widget class="QTextEdit" name="textEdit"/>
      </item>
     </layout>
    </widget>
@@ -163,6 +166,11 @@
    </property>
    <property name="toolTip">
     <string>Show in Explorer</string>
+   </property>
+  </action>
+  <action name="action_apply_filter">
+   <property name="text">
+    <string>Apply Filter</string>
    </property>
   </action>
  </widget>
