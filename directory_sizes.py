@@ -40,15 +40,30 @@ logger = get_logger('dir_sizes')
 def get_bytes(text, units='BKMGTPE'):
     """Возвращает числовое значение в байтах разбирая строки вида: 1 GB, 50 MB и т.п."""
 
+    # Возможно, мы просто получили число как строку, тогда не делаем с ней каких-то действий манипуляций,
+    # а только превращаем в число и возвращаем
+    try:
+        return float(text)
+    except:
+        pass
+
     text = text.strip().replace(' ', '').replace(',', '.')
 
+    text = text[:-1]
+    try:
+        # Если ошибок не случится, значит получили байты (предположительно),
+        # Это может быть строка: "766.00 B"
+        return int(float(text))
+    except:
+        pass
+
     # For '54,7GB' -> num='54,7' and unit='G'
-    num, unit = float(text[:-2]), text[-2:][0]
-    assert len(unit) == 1, 'Len unit should == 1, example G, M. Unit = {}.'.format(unit)
-    assert unit in units, 'Unknows unit {}, possible: {}.'.format(unit, ', '.join(tuple(units)))
+    num, unit = float(text[:-2]), text[-1:]
+    # assert len(unit) == 1, 'Len unit should == 1, example G, M. Unit = {}. Text={}.'.format(unit, text)
+    assert unit in units, 'Unknown unit {}, possible: {}. Text={}.'.format(unit, ', '.join(tuple(units)), text)
 
     unit_pow = units.find(unit)
-    assert unit_pow > 0, 'Unit pow should > 0, unit_pow={} unit={}.'.format(unit_pow, unit)
+    assert unit_pow >= 0, 'Unit pow should > 0, unit_pow={} unit={}. Text={}.'.format(unit_pow, unit, text)
 
     return int(num * 1024 ** unit_pow)
 
@@ -61,7 +76,7 @@ def pretty_file_size(n_size):
         size /= 1024
         i += 1
 
-    return n_size, '{:.2f}'.format(size) + ' ' + "BKMGTPE"[i] + 'B'
+    return n_size, '{:.2f}'.format(size) + ' ' + "BKMGTPE"[i] + ('B' if i > 0 else ' ')
 
 
 def dir_size_bytes(dir_path, files=0, dirs=0, level=0, do_indent=True, size_less=get_bytes('1 GB')):
