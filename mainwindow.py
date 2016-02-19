@@ -250,7 +250,6 @@ class MainWindow(QMainWindow):
             filter_size = "{size} >= %1GB%"
         self.ui.line_edit_filter.setText(filter_size)
 
-        print(config.value('Auto_apply_filter', True))
         self.ui.check_box_auto_apply_filter.setChecked('true' in config.value('Auto_apply_filter', 'true').lower())
 
     def write_settings(self):
