@@ -115,14 +115,17 @@
        <item row="1" column="0">
         <widget class="QLabel" name="label_min_size">
          <property name="text">
-          <string>Minimum size:</string>
+          <string>Filter size:</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="line_edit_less_min_size">
+        <widget class="QLineEdit" name="line_edit_filter_size">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Пример: {size} &amp;gt;= %1GB% and {size} &amp;lt;= %3GB%&lt;/p&gt;&lt;p&gt;size: размер папок в байтах, который будет подставляться в {size}&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="text">
-          <string>1 GB</string>
+          <string>{size} &gt;= %1GB%</string>
          </property>
         </widget>
        </item>
