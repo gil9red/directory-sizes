@@ -116,12 +116,12 @@
        <item row="1" column="0">
         <widget class="QLabel" name="label_min_size">
          <property name="text">
-          <string>Filter size:</string>
+          <string>Filter:</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="line_edit_filter_size">
+        <widget class="QLineEdit" name="line_edit_filter">
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Пример: {size} &amp;gt;= %1GB% and {size} &amp;lt;= %3GB%&lt;/p&gt;&lt;p&gt;size: размер папок в байтах, который будет подставляться в {size}&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>

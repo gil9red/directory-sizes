@@ -153,7 +153,7 @@ class MainWindow(QMainWindow):
 
         for row in reversed(range(root.rowCount())):
             child = root.child(row, 1)
-            filter_size = self.ui.line_edit_filter_size.text()
+            filter_size = self.ui.line_edit_filter.text()
             if not check_filter_size_eval(filter_size, directory_sizes.get_bytes(child.data(Qt.UserRole + 1))):
                 root.removeRow(child.row())
             else:
@@ -170,7 +170,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, 'Info', 'Choose dir path!')
             return
 
-        filter_size = self.ui.line_edit_filter_size.text()
+        filter_size = self.ui.line_edit_filter.text()
         if not filter_size:
             logger.debug('filter_size is empty. Setting default filter_size.')
             filter_size = "{size} >= %1GB%"
@@ -248,7 +248,7 @@ class MainWindow(QMainWindow):
         filter_size = config.value('Filter_size', None)
         if not filter_size:
             filter_size = "{size} >= %1GB%"
-        self.ui.line_edit_filter_size.setText(filter_size)
+        self.ui.line_edit_filter.setText(filter_size)
 
         print(config.value('Auto_apply_filter', True))
         self.ui.check_box_auto_apply_filter.setChecked('true' in config.value('Auto_apply_filter', 'true').lower())
@@ -259,7 +259,7 @@ class MainWindow(QMainWindow):
         config.setValue('MainWindow_Geometry', self.saveGeometry())
 
         config.setValue('Dir_path', self.ui.line_edit_dir_path.text())
-        config.setValue('Filter_size', self.ui.line_edit_filter_size.text())
+        config.setValue('Filter_size', self.ui.line_edit_filter.text())
 
         config.setValue('Auto_apply_filter', 'true' if self.ui.check_box_auto_apply_filter.isChecked() else 'false')
 

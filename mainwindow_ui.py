@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Fri Feb 19 15:10:38 2016
+# Created: Fri Feb 19 15:38:06 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -65,9 +65,9 @@ class Ui_MainWindow(object):
         self.label_min_size = QtGui.QLabel(self.dockWidgetContents_3)
         self.label_min_size.setObjectName("label_min_size")
         self.formLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_min_size)
-        self.line_edit_filter_size = QtGui.QLineEdit(self.dockWidgetContents_3)
-        self.line_edit_filter_size.setObjectName("line_edit_filter_size")
-        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.line_edit_filter_size)
+        self.line_edit_filter = QtGui.QLineEdit(self.dockWidgetContents_3)
+        self.line_edit_filter.setObjectName("line_edit_filter")
+        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.line_edit_filter)
         self.label_2 = QtGui.QLabel(self.dockWidgetContents_3)
         self.label_2.setObjectName("label_2")
         self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_2)
@@ -105,9 +105,9 @@ class Ui_MainWindow(object):
         self.line_edit_dir_path.setText(QtGui.QApplication.translate("MainWindow", "C:\\", None, QtGui.QApplication.UnicodeUTF8))
         self.button_select_dir.setToolTip(QtGui.QApplication.translate("MainWindow", "Select dir", None, QtGui.QApplication.UnicodeUTF8))
         self.button_select_dir.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_min_size.setText(QtGui.QApplication.translate("MainWindow", "Filter size:", None, QtGui.QApplication.UnicodeUTF8))
-        self.line_edit_filter_size.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p>Пример: {size} &gt;= %1GB% and {size} &lt;= %3GB%</p><p>size: размер папок в байтах, который будет подставляться в {size}</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.line_edit_filter_size.setText(QtGui.QApplication.translate("MainWindow", "{size} >= %1GB%", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_min_size.setText(QtGui.QApplication.translate("MainWindow", "Filter:", None, QtGui.QApplication.UnicodeUTF8))
+        self.line_edit_filter.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p>Пример: {size} &gt;= %1GB% and {size} &lt;= %3GB%</p><p>size: размер папок в байтах, который будет подставляться в {size}</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.line_edit_filter.setText(QtGui.QApplication.translate("MainWindow", "{size} >= %1GB%", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Auto apply filter", None, QtGui.QApplication.UnicodeUTF8))
         self.action_go.setText(QtGui.QApplication.translate("MainWindow", "Go", None, QtGui.QApplication.UnicodeUTF8))
         self.action_go.setToolTip(QtGui.QApplication.translate("MainWindow", "Go", None, QtGui.QApplication.UnicodeUTF8))
