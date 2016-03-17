@@ -78,6 +78,8 @@ class MainWindow(QMainWindow):
         self.ui.action_apply_filter.triggered.connect(self.slot_remove_dirs)
         self.ui.label_root_dir.setText(self.ui.line_edit_dir_path.text())
 
+        self.ui.action_apply_filter.setEnabled(False)
+
         self.read_settings()
 
     def update_states(self):
@@ -130,13 +132,7 @@ class MainWindow(QMainWindow):
 
         path, size = row
 
-        # TODO: Qt.UserRole + 1 / Qt.UserRole + 2
-        # TODO: Проверять: size.data(Qt.UserRole + 1) != size.data(Qt.UserRole + 2)
-        # self.ui.statusbar.showMessage('{} ({} / {} bytes)'.format(
-        #     path.data(Qt.UserRole + 1),
-        #     size.data(Qt.UserRole + 1),
-        #     size.data(Qt.UserRole + 2)))
-
+        # TODO: Лучше дать конкретные константные имена, чем так: Qt.UserRole + 1 / Qt.UserRole + 2
         self.ui.statusbar.showMessage('{} ({} / {} bytes)'.format(
             path.data(Qt.UserRole + 1),
             size.data(Qt.UserRole + 1),
@@ -160,9 +156,11 @@ class MainWindow(QMainWindow):
                 self.remove_dirs(root.child(row, 0))
 
     def slot_remove_dirs(self):
+        self.ui.action_apply_filter.setEnabled(False)
         self.remove_dirs(self.model.invisibleRootItem())
 
     def fill(self):
+        self.ui.action_go.setEnabled(False)
         self.clear_model()
 
         dir_path = self.ui.line_edit_dir_path.text()
@@ -186,12 +184,16 @@ class MainWindow(QMainWindow):
         for entry in dir_list:
             self.dir_size_bytes(entry, self.model.invisibleRootItem(), filter_size)
 
+        self.ui.action_apply_filter.setEnabled(True)
+
         if self.ui.check_box_auto_apply_filter.isChecked():
             self.slot_remove_dirs()
+            self.ui.action_apply_filter.setEnabled(False)
 
         t2 = time.clock() - t
         logger.debug('Done! Elapsed time {:.2f} sec.'.format(t2))
 
+        self.ui.action_go.setEnabled(True)
         QMessageBox.information(self, 'Info', 'Done!\n\nElapsed time {:.2f} sec.'.format(t2))
 
     def dir_size_bytes(self, dir_path, root_item, filter_size, level=0):
