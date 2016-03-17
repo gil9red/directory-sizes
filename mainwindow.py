@@ -190,11 +190,11 @@ class MainWindow(QMainWindow):
             self.slot_remove_dirs()
             self.ui.action_apply_filter.setEnabled(False)
 
-        t2 = time.clock() - t
-        logger.debug('Done! Elapsed time {:.2f} sec.'.format(t2))
+        t = time.clock() - t
+        logger.debug('Done! Elapsed time {:.2f} sec.'.format(t))
 
         self.ui.action_go.setEnabled(True)
-        QMessageBox.information(self, 'Info', 'Done!\n\nElapsed time {:.2f} sec.'.format(t2))
+        QMessageBox.information(self, 'Info', 'Done!\n\nElapsed time {:.2f} sec.'.format(t))
 
     def dir_size_bytes(self, dir_path, root_item, filter_size, level=0):
         dir_path = QDir.toNativeSeparators(dir_path)
