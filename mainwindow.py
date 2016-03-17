@@ -78,9 +78,6 @@ class MainWindow(QMainWindow):
         self.ui.action_apply_filter.triggered.connect(self.slot_remove_dirs)
         self.ui.label_root_dir.setText(self.ui.line_edit_dir_path.text())
 
-        # TODO: удалить action_apply_filter
-        self.ui.action_apply_filter.setVisible(False)
-
         self.read_settings()
 
     def update_states(self):
