@@ -6,7 +6,8 @@ __author__ = 'ipetrash'
 
 import sys
 
-from PySide.QtGui import QApplication
+# from PySide.QtGui import QApplication
+from PyQt4.QtGui import QApplication
 
 
 # TODO: возможность задать несколько путей поиска

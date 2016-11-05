@@ -9,8 +9,10 @@ import os.path
 import sys
 import time
 
-from PySide.QtGui import *
-from PySide.QtCore import *
+# from PySide.QtGui import *
+# from PySide.QtCore import *
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
 
 
 def get_logger(name, file='log.txt', encoding='utf8'):
