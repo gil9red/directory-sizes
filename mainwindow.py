@@ -8,18 +8,20 @@ import os.path
 import re
 import time
 
-# from PySide.QtGui import *
-# from PySide.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+try:
+    from PyQt5.QtGui import *
+    from PyQt5.QtWidgets import *
+    from PyQt5.QtCore import *
+
+except:
+    from PyQt4.QtGui import *
+    from PyQt4.QtCore import *
+
 
 from mainwindow_ui import Ui_MainWindow
-from common import *
 
-import directory_sizes
-
-
-logger = get_logger('directory_sizes_gui')
+from common import get_logger, get_bytes, pretty_file_size, CONFIG_FILE
+logger = get_logger('directory_sizes_gui', 'directory_sizes_gui.log')
 
 
 # TODO: enabled show_in_explorer on active item
@@ -35,18 +37,18 @@ def check_filter_size_eval(pattern, size):
     :type size: размер в байтах, который будет подставляться в {size} pattern. Целое число.
     """
 
-    # logger.debug('Pattern: %s.', pattern)
-    # logger.debug('Size: %s.', size)
+    logger.debug('Pattern: %s.', pattern)
+    logger.debug('Size: %s.', size)
 
     for match in set(re.findall('%.+?%', pattern)):
-        byte_size = directory_sizes.get_bytes(match[1:-1])
+        byte_size = get_bytes(match[1:-1])
         pattern = pattern.replace(match, str(byte_size))
 
     source = pattern.format(size=size)
-    # logger.debug('After replace. Source eval: %s.', source)
+    logger.debug('After replace. Source eval: %s.', source)
 
     result = eval(source)
-    # logger.debug('Result eval: %s.', result)
+    logger.debug('Result eval: %s.', result)
 
     return result
 
@@ -152,7 +154,7 @@ class MainWindow(QMainWindow):
         for row in reversed(range(root.rowCount())):
             child = root.child(row, 1)
             filter_size = self.ui.line_edit_filter.text()
-            if not check_filter_size_eval(filter_size, directory_sizes.get_bytes(child.data(Qt.UserRole + 1))):
+            if not check_filter_size_eval(filter_size, get_bytes(child.data(Qt.UserRole + 1))):
                 root.removeRow(child.row())
             else:
                 self.remove_dirs(root.child(row, 0))
@@ -201,7 +203,7 @@ class MainWindow(QMainWindow):
     def dir_size_bytes(self, dir_path, root_item, filter_size, level=0):
         dir_path = QDir.toNativeSeparators(dir_path)
 
-        it = QDirIterator(dir_path, '*.*', QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System)
+        it = QDirIterator(dir_path, QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System)
 
         sizes = 0
 
@@ -231,7 +233,7 @@ class MainWindow(QMainWindow):
 
             qApp.processEvents()
 
-        text_size = directory_sizes.pretty_file_size(sizes)[1]
+        text_size = pretty_file_size(sizes)[1]
         row[1].setText(text_size)
         row[1].setData(text_size)
         row[1].setData(str(sizes), Qt.UserRole + 2)
@@ -239,10 +241,14 @@ class MainWindow(QMainWindow):
         return sizes
 
     def read_settings(self):
-        # TODO: при сложных настройках, лучше перейти на json или yaml
         config = QSettings(CONFIG_FILE, QSettings.IniFormat)
-        self.restoreState(config.value('MainWindow_State'))
-        self.restoreGeometry(config.value('MainWindow_Geometry'))
+        mainwindow_state = config.value('MainWindow_State')
+        if mainwindow_state:
+            self.restoreState(mainwindow_state)
+
+        mainwindow_geometry = config.value('MainWindow_Geometry')
+        if mainwindow_geometry:
+            self.restoreGeometry(mainwindow_geometry)
 
         dir_path = config.value('Dir_path', None)
         if not dir_path:

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'mainwindow.ui'
-#
-# Created by: PyQt4 UI code generator 4.11.4
-#
-# WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+try:
+    from PyQt5 import QtCore
+    from PyQt5 import QtWidgets as QtGui
+
+except:
+    from PyQt4 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -105,8 +105,7 @@ class Ui_MainWindow(object):
         self.toolBarGeneral.addAction(self.action_show_in_explorer)
 
         self.retranslateUi(MainWindow)
-        QtCore.QObject.connect(self.line_edit_dir_path, QtCore.SIGNAL(_fromUtf8("textChanged(QString)")), self.label_root_dir.setText)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.line_edit_dir_path.textChanged.connect(self.label_root_dir.setText)
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "directory-sizes", None))

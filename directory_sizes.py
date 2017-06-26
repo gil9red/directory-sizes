@@ -4,89 +4,28 @@
 __author__ = 'ipetrash'
 
 
-import logging
 import os.path
-import sys
 import time
 
-# from PySide.QtGui import *
-# from PySide.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+
+try:
+    from PyQt5.QtWidgets import *
+    from PyQt5.QtCore import *
+
+except:
+    from PyQt4.QtGui import *
+    from PyQt4.QtCore import *
 
 
-def get_logger(name, file='log.txt', encoding='utf8'):
-    log = logging.getLogger(name)
-    log.setLevel(logging.DEBUG)
-
-    formatter = logging.Formatter('%(message)s')
-
-    fh = logging.FileHandler(file, encoding=encoding)
-    fh.setLevel(logging.DEBUG)
-
-    ch = logging.StreamHandler(stream=sys.stdout)
-    ch.setLevel(logging.DEBUG)
-
-    fh.setFormatter(formatter)
-    ch.setFormatter(formatter)
-
-    log.addHandler(fh)
-    log.addHandler(ch)
-
-    return log
-
-
-logger = get_logger('dir_sizes')
-
-
-def get_bytes(text, units='BKMGTPE'):
-    """Возвращает числовое значение в байтах разбирая строки вида: 1 GB, 50 MB и т.п."""
-
-    # Возможно, мы просто получили число как строку, тогда не делаем с ней каких-то действий манипуляций,
-    # а только превращаем в число и возвращаем
-    try:
-        return float(text)
-    except:
-        pass
-
-    text = text.strip().replace(' ', '').replace(',', '.')
-
-    text = text[:-1]
-    try:
-        # Если ошибок не случится, значит получили байты (предположительно),
-        # Это может быть строка: "766.00 B"
-        return int(float(text))
-    except:
-        pass
-
-    # For '54,7GB' -> num='54,7' and unit='G'
-    num, unit = float(text[:-1]), text[-1:]
-
-    # assert len(unit) == 1, 'Len unit should == 1, example G, M. Unit = {}. Text={}.'.format(unit, text)
-    assert unit in units, 'Unknown unit {}, possible: {}. Text={}.'.format(unit, ', '.join(tuple(units)), text)
-
-    unit_pow = units.find(unit)
-    assert unit_pow >= 0, 'Unit pow should > 0, unit_pow={} unit={}. Text={}.'.format(unit_pow, unit, text)
-
-    return int(num * 1024 ** unit_pow)
-
-
-def pretty_file_size(n_size):
-    i = 0
-    size = n_size
-
-    while size >= 1024:
-        size /= 1024
-        i += 1
-
-    return n_size, '{:.2f}'.format(size) + ' ' + "BKMGTPE"[i] + ('B' if i > 0 else ' ')
+from common import get_logger, get_bytes, pretty_file_size
+logger = get_logger('dir_sizes', 'dir_sizes.log')
 
 
 def dir_size_bytes(dir_path, files=0, dirs=0, level=0, do_indent=True, size_less=None):
     if size_less is None:
         size_less = get_bytes('1 GB')
 
-    it = QDirIterator(dir_path, '*.*', QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System)
+    it = QDirIterator(dir_path, QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System)
 
     sizes = 0
 
@@ -113,8 +52,6 @@ def dir_size_bytes(dir_path, files=0, dirs=0, level=0, do_indent=True, size_less
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-
     dir_name = r"C:\\"
 
     t = time.clock()

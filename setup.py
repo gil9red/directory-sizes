@@ -11,7 +11,7 @@ from cx_Freeze import setup, Executable
 
 executables = [
     Executable(
-        'directory_sizes_gui.py',
+        'main.py',
         base='Win32GUI',
     )
 ]
