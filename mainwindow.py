@@ -178,7 +178,7 @@ class MainWindow(QMainWindow):
             filter_size = "{size} >= %1GB%"
             logger.debug('filter_size: %s.', filter_size)
 
-        t = time.clock()
+        t = time.perf_counter()
 
         # Соберем список папок
         dir_list = [os.path.join(dir_path, entry)
@@ -194,7 +194,7 @@ class MainWindow(QMainWindow):
             self.slot_remove_dirs()
             self.ui.action_apply_filter.setEnabled(False)
 
-        t = time.clock() - t
+        t = time.perf_counter() - t
         logger.debug('Done! Elapsed time {:.2f} sec.'.format(t))
 
         self.ui.action_go.setEnabled(True)
