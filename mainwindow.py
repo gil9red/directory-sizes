@@ -6,6 +6,7 @@ __author__ = 'ipetrash'
 
 import os.path
 import re
+import sys
 import time
 
 try:
@@ -274,4 +275,4 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         self.write_settings()
-        quit()
+        sys.exit()
