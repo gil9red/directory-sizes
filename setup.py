@@ -11,13 +11,14 @@ from cx_Freeze import setup, Executable
 
 executables = [
     Executable(
-        'main.py',
-        base='Win32GUI',
+        "main.py",
+        base="Win32GUI",
     )
 ]
 
-setup(name='directory-sizes',
-      version='0.1',
-      description='directory-sizes',
-      executables=executables
-      )
+setup(
+    name="directory-sizes",
+    version="0.1",
+    description="directory-sizes",
+    executables=executables,
+)
