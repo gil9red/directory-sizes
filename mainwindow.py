@@ -65,24 +65,28 @@ from config import CONFIG_FILE
 # TODO: action expandall and collapseall
 
 
-def check_filter_size_eval(pattern, size):
+def check_filter_size_eval(pattern: str, size_bytes: int) -> bool:
     """Функция выполнит проверку по шаблону pattern и вернет результат: True или False.
 
     :type pattern: шаблон фильтра размера, например: '{size} >= %1GB% and {size} <= %3GB%'
-    :type size: размер в байтах, который будет подставляться в {size} pattern. Целое число.
+    :type size_bytes: размер в байтах, который будет подставляться в {size} pattern. Целое число.
     """
 
     logger.debug("Pattern: %s.", pattern)
-    logger.debug("Size: %s.", size)
+    logger.debug("Size: %s bytes.", size_bytes)
 
-    for match in set(re.findall("%.+?%", pattern)):
-        byte_size = get_bytes(match[1:-1])
-        pattern = pattern.replace(match, str(byte_size))
+    pattern: str = re.sub(
+        r"%(.+?)%",
+        lambda m: str(
+            get_bytes(m.group(1))
+        ),
+        pattern,
+    )
 
-    source = pattern.format(size=size)
+    source: str = pattern.format(size=size_bytes)
     logger.debug("After replace. Source eval: %s.", source)
 
-    result = eval(source)
+    result: bool = eval(source)
     logger.debug("Result eval: %s.", result)
 
     return result
