@@ -42,7 +42,7 @@ def get_logger(file_name: str, dir_name: Path = config.DIR / "logs") -> logging.
     return log
 
 
-def get_bytes(text: str, units: str = "BKMGTPE") -> int | float:
+def get_bytes(text: str, units: str = "BKMGTPE") -> float:
     """Возвращает числовое значение в байтах разбирая строки вида: 1 GB, 50 MB и т.п."""
 
     # Возможно, мы просто получили число как строку, тогда не делаем с ней каких-то действий манипуляций,
@@ -54,16 +54,18 @@ def get_bytes(text: str, units: str = "BKMGTPE") -> int | float:
 
     text = text.strip().replace(" ", "").replace(",", ".")
 
+    # NOTE: "766.00 B" -> "766.00", "766.5 GB" -> "766.5 G"
     text = text[:-1]
     try:
         # Если ошибок не случится, значит получили байты (предположительно),
         # Это может быть строка: "766.00 B"
-        return int(float(text))
+        return float(text)
     except:
         pass
 
-    # For '54,7GB' -> num='54,7' and unit='G'
-    num, unit = float(text[:-1]), text[-1:]
+    # NOTE: For '54,7G' -> num='54,7' and unit='G'
+    num = float(text[:-1])
+    unit = text[-1:]
 
     assert (
         unit in units
@@ -74,10 +76,10 @@ def get_bytes(text: str, units: str = "BKMGTPE") -> int | float:
         unit_pow >= 0
     ), f"Unit pow should > 0, unit_pow={unit_pow} unit={unit}. Text={text}."
 
-    return int(num * 1024**unit_pow)
+    return num * (1024**unit_pow)
 
 
-def pretty_file_size(n_size: int) -> str:
+def pretty_file_size(n_size: float) -> str:
     i = 0
     size = n_size
 
@@ -89,3 +91,9 @@ def pretty_file_size(n_size: int) -> str:
 
 
 logger = get_logger("directory_sizes_gui")
+
+
+if __name__ == '__main__':
+    for value in ["1 B", "1 KB", "1 MB", "1 GB"]:
+        total_bytes = get_bytes(value)
+        print(value, total_bytes, pretty_file_size(total_bytes))

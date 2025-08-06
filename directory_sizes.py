@@ -20,13 +20,17 @@ from common import get_logger, get_bytes, pretty_file_size
 logger = get_logger("dir_sizes")
 
 
-def dir_size_bytes(dir_path, files=0, dirs=0, level=0, do_indent=True, size_less=None):
-    if size_less is None:
-        size_less = get_bytes("1 GB")
-
+def dir_size_bytes(
+    dir_path: str,
+    files: int = 0,
+    dirs: int = 0,
+    level: int = 0,
+    do_indent: bool = True,
+    size_less: float = get_bytes("1 GB"),
+) -> tuple[int, int, int]:
     try:
-        # NOTE: AllEntries = Dirs | Files | Drives
         filters = (
+            # NOTE: AllEntries = Dirs | Files | Drives
             QDir.Filter.AllEntries
             | QDir.Filter.NoDotAndDotDot
             | QDir.Filter.Hidden
@@ -37,11 +41,12 @@ def dir_size_bytes(dir_path, files=0, dirs=0, level=0, do_indent=True, size_less
 
     it = QDirIterator(dir_path, filters)
 
-    # TODO: Переименовать и аннотировать переменные
-    sizes = 0
+    total_bytes: int = 0
 
     while it.hasNext():
         file_name = it.next()
+
+        # TODO: Где-то тут была ошибка
         file = QFileInfo(file_name)
 
         if file.isDir():
@@ -53,15 +58,15 @@ def dir_size_bytes(dir_path, files=0, dirs=0, level=0, do_indent=True, size_less
             files += 1
             size = file.size()
 
-        sizes += size
+        total_bytes += size
 
-    if sizes > size_less:
+    if total_bytes > size_less:
         logger.debug(
             ((" " * 4 * level) if do_indent else "")
-            + f"{os.path.normpath(dir_path)} {pretty_file_size(sizes)} ({sizes} bytes)"
+            + f"{os.path.normpath(dir_path)} {pretty_file_size(total_bytes)} ({total_bytes} bytes)"
         )
 
-    return sizes, files, dirs
+    return total_bytes, files, dirs
 
 
 if __name__ == "__main__":
