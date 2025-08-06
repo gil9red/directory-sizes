@@ -107,6 +107,8 @@ class MainWindow(QMainWindow):
         for tool in self.findChildren(QToolBar):
             self.ui.menuTools.addAction(tool.toggleViewAction())
 
+        self.ui.action_about_qt.triggered.connect(QApplication.aboutQt)
+
         self.model = QStandardItemModel()
         self.clear_model()
 

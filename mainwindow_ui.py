@@ -166,6 +166,9 @@ class Ui_MainWindow(object):
         self.action_apply_filter.setObjectName("action_apply_filter")
         self.menubar.addAction(self.menuDockWindow.menuAction())
         self.menubar.addAction(self.menuTools.menuAction())
+        self.action_about_qt = QAction(MainWindow)
+        self.action_about_qt.setObjectName("action_about_qt")
+        self.menubar.addAction(self.action_about_qt)
         self.toolBarGeneral.addAction(self.action_go)
         self.toolBarGeneral.addAction(self.action_apply_filter)
         self.toolBarGeneral.addAction(self.action_show_in_explorer)
@@ -175,7 +178,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "directory-sizes", None))
-        self.menuDockWindow.setTitle(_translate("MainWindow", "Окна", None))
+        self.menuDockWindow.setTitle(_translate("MainWindow", "Windows", None))
         self.menuTools.setTitle(_translate("MainWindow", "Tools", None))
         self.toolBarGeneral.setWindowTitle(_translate("MainWindow", "General", None))
         self.dockWidgetSettings.setWindowTitle(
@@ -195,6 +198,7 @@ class Ui_MainWindow(object):
         )
         self.line_edit_filter.setText(_translate("MainWindow", "{size} >= %1GB%", None))
         self.label_2.setText(_translate("MainWindow", "Auto apply filter", None))
+        self.action_about_qt.setText(_translate("MainWindow", "About Qt", None))
         self.action_go.setText(_translate("MainWindow", "Go", None))
         self.action_go.setToolTip(_translate("MainWindow", "Go", None))
         self.action_show_in_explorer.setText(
