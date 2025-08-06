@@ -11,21 +11,51 @@ import sys
 import time
 
 try:
-    from PyQt5.QtGui import *
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtCore import *
+    from PyQt6.QtGui import QStandardItemModel, QStandardItem
+    from PyQt6.QtWidgets import (
+        QApplication,
+        QMainWindow,
+        QDockWidget,
+        QToolBar,
+        QFileDialog,
+        QMessageBox,
+    )
+    from PyQt6.QtCore import QSettings, Qt, QDir, QDirIterator, QFileInfo
+except ImportError as e:
+    try:
+        from PyQt5.QtGui import QStandardItemModel, QStandardItem
+        from PyQt5.QtWidgets import (
+            QApplication,
+            QMainWindow,
+            QDockWidget,
+            QToolBar,
+            QFileDialog,
+            QMessageBox,
+        )
+        from PyQt5.QtCore import QSettings, Qt, QDir, QDirIterator, QFileInfo
+    except ImportError:
+        from PyQt4.QtGui import (
+            QApplication,
+            QMainWindow,
+            QDockWidget,
+            QToolBar,
+            QStandardItemModel,
+            QStandardItem,
+            QFileDialog,
+            QMessageBox,
+        )
+        from PyQt4.QtCore import QSettings, Qt, QDir, QDirIterator, QFileInfo
 
+try:
+    QSettings_IniFormat = QSettings.Format.IniFormat
+    Qt_UserRole = Qt.ItemDataRole.UserRole
 except:
-    from PyQt4.QtGui import *
-    from PyQt4.QtCore import *
-
+    QSettings_IniFormat = QSettings.IniFormat
+    Qt_UserRole = Qt.UserRole
 
 from mainwindow_ui import Ui_MainWindow
 
-from common import get_logger, get_bytes, pretty_file_size, CONFIG_FILE
-
-
-logger = get_logger("directory_sizes_gui", "directory_sizes_gui.log")
+from common import get_bytes, pretty_file_size, CONFIG_FILE, logger
 
 
 # TODO: enabled show_in_explorer on active item
@@ -102,8 +132,7 @@ class MainWindow(QMainWindow):
         if row is None:
             return
 
-        # TODO: Qt.UserRole + 1
-        path = row[0].data(Qt.UserRole + 1)
+        path = row[0].data(Qt_UserRole + 1)
 
         os.startfile(path)
 
@@ -140,7 +169,7 @@ class MainWindow(QMainWindow):
 
         # TODO: Лучше дать конкретные константные имена, чем так: Qt.UserRole + 1 / Qt.UserRole + 2
         self.ui.statusbar.showMessage(
-            f"{path.data(Qt.UserRole + 1)} ({size.data(Qt.UserRole + 1)} / {size.data(Qt.UserRole + 2)} bytes)"
+            f"{path.data(Qt_UserRole + 1)} ({size.data(Qt_UserRole + 1)} / {size.data(Qt_UserRole + 2)} bytes)"
         )
 
     def clear_model(self):
@@ -156,7 +185,7 @@ class MainWindow(QMainWindow):
             child = root.child(row, 1)
             filter_size = self.ui.line_edit_filter.text()
             if not check_filter_size_eval(
-                filter_size, get_bytes(child.data(Qt.UserRole + 1))
+                filter_size, get_bytes(child.data(Qt_UserRole + 1))
             ):
                 root.removeRow(child.row())
             else:
@@ -210,9 +239,19 @@ class MainWindow(QMainWindow):
     def dir_size_bytes(self, dir_path, root_item, filter_size, level=0):
         dir_path = QDir.toNativeSeparators(dir_path)
 
-        it = QDirIterator(
-            dir_path, QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System
-        )
+        # TODO: Брать из dierctory_sizes.py
+        try:
+            # NOTE: AllEntries = Dirs | Files | Drives
+            filters = (
+                QDir.Filter.AllEntries
+                | QDir.Filter.NoDotAndDotDot
+                | QDir.Filter.Hidden
+                | QDir.Filter.System
+            )
+        except:
+            filters = QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System
+
+        it = QDirIterator(dir_path, filters)
 
         sizes = 0
 
@@ -242,17 +281,17 @@ class MainWindow(QMainWindow):
 
             sizes += size
 
-            qApp.processEvents()
+            QApplication.instance().processEvents()
 
         text_size: str = pretty_file_size(sizes)
         row[1].setText(text_size)
         row[1].setData(text_size)
-        row[1].setData(str(sizes), Qt.UserRole + 2)
+        row[1].setData(str(sizes), Qt_UserRole + 2)  # TODO: Qt_UserRole в enum?
 
         return sizes
 
     def read_settings(self):
-        config = QSettings(CONFIG_FILE, QSettings.IniFormat)
+        config = QSettings(CONFIG_FILE, QSettings_IniFormat)
         mainwindow_state = config.value("MainWindow_State")
         if mainwindow_state:
             self.restoreState(mainwindow_state)
@@ -272,11 +311,11 @@ class MainWindow(QMainWindow):
         self.ui.line_edit_filter.setText(filter_size)
 
         self.ui.check_box_auto_apply_filter.setChecked(
-            "true" in config.value("Auto_apply_filter", "true").lower()
+            "true" == config.value("Auto_apply_filter", "true").lower()
         )
 
     def write_settings(self):
-        config = QSettings(CONFIG_FILE, QSettings.IniFormat)
+        config = QSettings(CONFIG_FILE, QSettings_IniFormat)
         config.setValue("MainWindow_State", self.saveState())
         config.setValue("MainWindow_Geometry", self.saveGeometry())
 

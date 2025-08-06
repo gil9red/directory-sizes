@@ -57,7 +57,6 @@ def get_bytes(text: str, units: str = "BKMGTPE") -> int | float:
     # For '54,7GB' -> num='54,7' and unit='G'
     num, unit = float(text[:-1]), text[-1:]
 
-    # assert len(unit) == 1, 'Len unit should == 1, example G, M. Unit = {}. Text={}.'.format(unit, text)
     assert (
         unit in units
     ), f"Unknown unit {unit}, possible: {', '.join(tuple(units))}. Text={text}."
@@ -79,3 +78,6 @@ def pretty_file_size(n_size: int) -> str:
         i += 1
 
     return f"{'{:.2f}'.format(size)} {'BKMGTPE'[i]}{('B' if i > 0 else ' ')}"
+
+
+logger = get_logger("directory_sizes_gui", "directory_sizes_gui.log")
