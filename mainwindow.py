@@ -55,7 +55,8 @@ except:
 
 from mainwindow_ui import Ui_MainWindow
 
-from common import get_bytes, pretty_file_size, CONFIG_FILE, logger
+from common import get_bytes, pretty_file_size, logger
+from config import CONFIG_FILE
 
 
 # TODO: enabled show_in_explorer on active item

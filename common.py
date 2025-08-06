@@ -4,9 +4,6 @@
 __author__ = "ipetrash"
 
 
-CONFIG_FILE = "config"
-
-
 import sys
 import logging
 
