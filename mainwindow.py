@@ -20,7 +20,7 @@ try:
         QFileDialog,
         QMessageBox,
     )
-    from PyQt6.QtCore import QSettings, Qt, QDir, QDirIterator, QFileInfo
+    from PyQt6.QtCore import QSettings, Qt, QDir, QDirIterator, QFileInfo, QModelIndex
 except ImportError as e:
     try:
         from PyQt5.QtGui import QStandardItemModel, QStandardItem
@@ -32,7 +32,14 @@ except ImportError as e:
             QFileDialog,
             QMessageBox,
         )
-        from PyQt5.QtCore import QSettings, Qt, QDir, QDirIterator, QFileInfo
+        from PyQt5.QtCore import (
+            QSettings,
+            Qt,
+            QDir,
+            QDirIterator,
+            QFileInfo,
+            QModelIndex,
+        )
     except ImportError:
         from PyQt4.QtGui import (
             QApplication,
@@ -44,7 +51,14 @@ except ImportError as e:
             QFileDialog,
             QMessageBox,
         )
-        from PyQt4.QtCore import QSettings, Qt, QDir, QDirIterator, QFileInfo
+        from PyQt4.QtCore import (
+            QSettings,
+            Qt,
+            QDir,
+            QDirIterator,
+            QFileInfo,
+            QModelIndex,
+        )
 
 try:
     QSettings_IniFormat = QSettings.Format.IniFormat
@@ -65,7 +79,7 @@ from config import CONFIG_FILE
 # TODO: action expandall and collapseall
 
 
-def check_filter_size_eval(pattern: str, size_bytes: int) -> bool:
+def check_filter_size_eval(pattern: str, size_bytes: int | float) -> bool:
     """Функция выполнит проверку по шаблону pattern и вернет результат: True или False.
 
     :type pattern: шаблон фильтра размера, например: '{size} >= %1GB% and {size} <= %3GB%'
@@ -77,9 +91,7 @@ def check_filter_size_eval(pattern: str, size_bytes: int) -> bool:
 
     pattern: str = re.sub(
         r"%(.+?)%",
-        lambda m: str(
-            get_bytes(m.group(1))
-        ),
+        lambda m: str(get_bytes(m.group(1))),
         pattern,
     )
 
@@ -127,7 +139,7 @@ class MainWindow(QMainWindow):
 
         self.read_settings()
 
-    def show_in_explorer(self, index=None):
+    def show_in_explorer(self, index: QModelIndex | None = None):
         if index is None:
             index = self.ui.treeView.currentIndex()
             if index is None:
@@ -148,7 +160,9 @@ class MainWindow(QMainWindow):
         if dir_path:
             self.ui.line_edit_dir_path.setText(dir_path)
 
-    def get_row_item_from_index(self, index):
+    def get_row_item_from_index(
+        self, index: QModelIndex | None = None
+    ) -> list[QStandardItem] | None:
         if index is None or not index.isValid:
             logger.warn("get_row_from_index: invalid index: %s.", index)
             return
@@ -165,7 +179,7 @@ class MainWindow(QMainWindow):
 
         return [parent.child(row, i) for i in range(self.model.columnCount())]
 
-    def show_info_in_status_bar(self, index):
+    def show_info_in_status_bar(self, index: QModelIndex | None = None):
         row = self.get_row_item_from_index(index)
         if row is None:
             return
@@ -183,7 +197,7 @@ class MainWindow(QMainWindow):
         self.model.setColumnCount(len(header_labels))
         self.model.setHorizontalHeaderLabels(header_labels)
 
-    def remove_dirs(self, root):
+    def remove_dirs(self, root: QStandardItem):
         """Удаление элементов, у которых размер не совпадает с фильтром"""
 
         for row in reversed(range(root.rowCount())):
@@ -204,44 +218,50 @@ class MainWindow(QMainWindow):
         self.ui.action_go.setEnabled(False)
         self.clear_model()
 
-        dir_path = self.ui.line_edit_dir_path.text()
+        dir_path: str = self.ui.line_edit_dir_path.text()
         if not dir_path or not os.path.exists(dir_path):
             QMessageBox.information(self, "Info", "Choose dir path!")
             return
 
-        filter_size = self.ui.line_edit_filter.text()
+        filter_size: str = self.ui.line_edit_filter.text()
         if not filter_size:
             logger.debug("filter_size is empty. Setting default filter_size.")
             filter_size = "{size} >= %1GB%"
             logger.debug("filter_size: %s.", filter_size)
 
-        t = time.perf_counter()
+        t: float = time.perf_counter()
+        try:
+            # Соберем список папок
+            dir_list: list[str] = [
+                os.path.join(dir_path, entry)
+                for entry in os.listdir(dir_path)
+                if os.path.isdir(os.path.join(dir_path, entry))
+            ]
 
-        # Соберем список папок
-        dir_list = [
-            os.path.join(dir_path, entry)
-            for entry in os.listdir(dir_path)
-            if os.path.isdir(os.path.join(dir_path, entry))
-        ]
+            for entry in dir_list:
+                self.dir_size_bytes(entry, self.model.invisibleRootItem(), filter_size)
 
-        for entry in dir_list:
-            self.dir_size_bytes(entry, self.model.invisibleRootItem(), filter_size)
+            self.ui.action_apply_filter.setEnabled(True)
 
-        self.ui.action_apply_filter.setEnabled(True)
+            if self.ui.check_box_auto_apply_filter.isChecked():
+                self.slot_remove_dirs()
+                self.ui.action_apply_filter.setEnabled(False)
+        finally:
+            t = time.perf_counter() - t
+            logger.debug("Done! Elapsed time {:.2f} sec.".format(t))
 
-        if self.ui.check_box_auto_apply_filter.isChecked():
-            self.slot_remove_dirs()
-            self.ui.action_apply_filter.setEnabled(False)
+            self.ui.action_go.setEnabled(True)
+            QMessageBox.information(
+                self, "Info", "Done!\n\nElapsed time {:.2f} sec.".format(t)
+            )
 
-        t = time.perf_counter() - t
-        logger.debug("Done! Elapsed time {:.2f} sec.".format(t))
-
-        self.ui.action_go.setEnabled(True)
-        QMessageBox.information(
-            self, "Info", "Done!\n\nElapsed time {:.2f} sec.".format(t)
-        )
-
-    def dir_size_bytes(self, dir_path, root_item, filter_size, level=0):
+    def dir_size_bytes(
+        self,
+        dir_path: str,
+        root_item: QStandardItem,
+        filter_size: str,
+        level: int = 0,
+    ) -> int:
         dir_path = QDir.toNativeSeparators(dir_path)
 
         # TODO: Брать из dierctory_sizes.py
@@ -258,7 +278,7 @@ class MainWindow(QMainWindow):
 
         it = QDirIterator(dir_path, filters)
 
-        sizes = 0
+        sizes: int = 0
 
         path_short_name = os.path.split(dir_path)
         path_short_name = (
