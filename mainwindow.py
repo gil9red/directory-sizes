@@ -112,14 +112,12 @@ class MainWindow(QMainWindow):
 
         self.ui.treeView.setModel(self.model)
 
-        self.ui.treeView.clicked.connect(lambda: self.show_info_in_status_bar)
-        self.ui.treeView.doubleClicked.connect(lambda: self.show_in_explorer())
+        self.ui.treeView.clicked.connect(self.show_info_in_status_bar)
+        self.ui.treeView.doubleClicked.connect(self.show_in_explorer)
 
         self.ui.button_select_dir.clicked.connect(self.select_dir)
         self.ui.action_go.triggered.connect(self.fill)
-        self.ui.action_show_in_explorer.triggered.connect(
-            lambda: self.show_in_explorer()
-        )
+        self.ui.action_show_in_explorer.triggered.connect(self.show_in_explorer)
         self.ui.action_apply_filter.triggered.connect(self.slot_remove_dirs)
         self.ui.label_root_dir.setText(self.ui.line_edit_dir_path.text())
 
