@@ -4,4 +4,4 @@ Show directory sizes (#python #python3 #Qt #gui)
 
 ##
 
-![](screenshot.png)
+![](etc/screenshot.png)
