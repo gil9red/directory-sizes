@@ -109,3 +109,4 @@ crashlytics-build.properties
 
 # For current project
 config.ini
+logs/

@@ -17,7 +17,7 @@ except ImportError:
 from common import get_logger, get_bytes, pretty_file_size
 
 
-logger = get_logger("dir_sizes", "dir_sizes.log")
+logger = get_logger("dir_sizes")
 
 
 def dir_size_bytes(dir_path, files=0, dirs=0, level=0, do_indent=True, size_less=None):

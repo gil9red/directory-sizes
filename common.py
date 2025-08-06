@@ -7,25 +7,36 @@ __author__ = "ipetrash"
 import sys
 import logging
 
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
-def get_logger(name, file="log.txt", encoding="utf8"):
-    log = logging.getLogger(name)
+import config
+
+
+def get_logger(file_name: str, dir_name: Path = config.DIR / "logs") -> logging.Logger:
+    log = logging.getLogger(file_name)
     log.setLevel(logging.DEBUG)
+
+    dir_name = dir_name.resolve()
+    dir_name.mkdir(parents=True, exist_ok=True)
+
+    file_name = Path(file_name).resolve()
+    file_name = dir_name / (file_name.name + ".log")
 
     formatter = logging.Formatter(
         "[%(asctime)s] %(filename)s[LINE:%(lineno)d] %(levelname)-8s %(message)s"
     )
 
-    fh = logging.FileHandler(file, encoding=encoding)
+    fh = RotatingFileHandler(
+        file_name, maxBytes=10_000_000, backupCount=5, encoding="utf-8"
+    )
     fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
 
     ch = logging.StreamHandler(stream=sys.stdout)
     ch.setLevel(logging.DEBUG)
-
-    fh.setFormatter(formatter)
     ch.setFormatter(formatter)
-
-    log.addHandler(fh)
     log.addHandler(ch)
 
     return log
@@ -77,4 +88,4 @@ def pretty_file_size(n_size: int) -> str:
     return f"{'{:.2f}'.format(size)} {'BKMGTPE'[i]}{('B' if i > 0 else ' ')}"
 
 
-logger = get_logger("directory_sizes_gui", "directory_sizes_gui.log")
+logger = get_logger("directory_sizes_gui")
