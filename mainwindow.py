@@ -4,6 +4,7 @@
 __author__ = "ipetrash"
 
 
+import enum
 import os
 import os.path
 import re
@@ -73,13 +74,12 @@ from common import get_bytes, pretty_file_size, logger
 from config import CONFIG_FILE
 
 
-# TODO: enabled show_in_explorer on active item
 # TODO: проверка на исключения: должны ловиться в любом месте и показываться в статус баре по кнопке и
 # в messagebox'е (как в tx)
 # TODO: action expandall and collapseall
 
 
-def check_filter_size_eval(pattern: str, size_bytes: int | float) -> bool:
+def check_filter_size_eval(pattern: str, size_bytes: int) -> bool:
     """Функция выполнит проверку по шаблону pattern и вернет результат: True или False.
 
     :type pattern: шаблон фильтра размера, например: '{size} >= %1GB% and {size} <= %3GB%'
@@ -102,6 +102,21 @@ def check_filter_size_eval(pattern: str, size_bytes: int | float) -> bool:
     logger.debug("Result eval: %s.", result)
 
     return result
+
+
+class ColumnEnum(enum.Enum):
+    NAME = 0, "Name"
+    SIZE = 1, "Size"
+
+    def __init__(self, value: int, title: str):
+        self._value_ = value
+        self.title = title
+
+
+class RowDataEnum(enum.Enum):
+    PATH = Qt_UserRole + 1
+    SIZE_BYTES = Qt_UserRole + 2
+    SIZE_HUMAN = Qt_UserRole + 3
 
 
 class MainWindow(QMainWindow):
@@ -129,14 +144,16 @@ class MainWindow(QMainWindow):
         self.ui.treeView.clicked.connect(
             lambda index: (
                 self.show_info_in_status_bar(index),
-                self.ui.action_show_in_explorer.setEnabled(True)
+                self.ui.action_show_in_explorer.setEnabled(True),
             )
         )
         self.ui.treeView.doubleClicked.connect(self.show_in_explorer)
 
         self.ui.button_select_dir.clicked.connect(self.select_dir)
         self.ui.action_go.triggered.connect(self.fill)
-        self.ui.action_show_in_explorer.triggered.connect(lambda: self.show_in_explorer())
+        self.ui.action_show_in_explorer.triggered.connect(
+            lambda: self.show_in_explorer()
+        )
         self.ui.action_apply_filter.triggered.connect(self.slot_remove_dirs)
 
         self.ui.action_apply_filter.setEnabled(False)
@@ -154,20 +171,22 @@ class MainWindow(QMainWindow):
         if row is None:
             return
 
-        path = row[0].data(Qt_UserRole + 1)
+        item_name, _ = row
+        path: str = item_name.data(RowDataEnum.PATH.value)
 
         os.startfile(path)
 
     def select_dir(self):
-        dir_path = QFileDialog.getExistingDirectory(
-            self, None, self.ui.line_edit_dir_path.text()
+        dir_path: str = QFileDialog.getExistingDirectory(
+            parent=self, caption=None, directory=self.ui.line_edit_dir_path.text()
         )
         if dir_path:
             self.ui.line_edit_dir_path.setText(dir_path)
 
     def get_row_item_from_index(
-        self, index: QModelIndex | None = None
-    ) -> list[QStandardItem] | None:
+        self,
+        index: QModelIndex | None = None,
+    ) -> tuple[QStandardItem, QStandardItem] | None:
         if index is None or not index.isValid:
             logger.warn("get_row_from_index: invalid index: %s.", index)
             return
@@ -182,43 +201,45 @@ class MainWindow(QMainWindow):
         if parent is None:
             parent = self.model.invisibleRootItem()
 
-        return [parent.child(row, i) for i in range(self.model.columnCount())]
+        return (
+            parent.child(row, ColumnEnum.NAME.value),
+            parent.child(row, ColumnEnum.SIZE.value),
+        )
 
     def show_info_in_status_bar(self, index: QModelIndex | None = None):
         row = self.get_row_item_from_index(index)
         if row is None:
             return
 
-        path, size = row
+        item_name, item_size = row
 
-        dir_path: str = QDir.toNativeSeparators(
-            path.data(Qt_UserRole + 1)
-        )
-        size_human: str = size.data(Qt_UserRole + 1)
-        size_bytes: int = size.data(Qt_UserRole + 2)
+        dir_path: str = item_name.data(RowDataEnum.PATH.value)
+        size_bytes: int = item_name.data(RowDataEnum.SIZE_BYTES.value)
+        size_human: str = item_name.data(RowDataEnum.SIZE_HUMAN.value)
 
-        self.ui.statusbar.showMessage(
-            f"{dir_path} ({size_human} / {size_bytes} bytes)"
-        )
+        self.ui.statusbar.showMessage(f"{dir_path} ({size_human} / {size_bytes} bytes)")
 
     def clear_model(self):
         self.model.clear()
-        header_labels = ["Name", "Size"]
+
+        header_labels: list[str] = [item.title for item in ColumnEnum]
         self.model.setColumnCount(len(header_labels))
         self.model.setHorizontalHeaderLabels(header_labels)
 
     def remove_dirs(self, root: QStandardItem):
         """Удаление элементов, у которых размер не совпадает с фильтром"""
 
+        filter_size: str = self.ui.line_edit_filter.text()
+
         for row in reversed(range(root.rowCount())):
-            child = root.child(row, 1)
-            filter_size = self.ui.line_edit_filter.text()
+            item_name = root.child(row, ColumnEnum.NAME.value)
             if not check_filter_size_eval(
-                filter_size, get_bytes(child.data(Qt_UserRole + 1))
+                pattern=filter_size,
+                size_bytes=item_name.data(RowDataEnum.SIZE_BYTES.value),
             ):
-                root.removeRow(child.row())
+                root.removeRow(item_name.row())
             else:
-                self.remove_dirs(root.child(row, 0))
+                self.remove_dirs(item_name)
 
     def slot_remove_dirs(self):
         self.ui.action_apply_filter.setEnabled(False)
@@ -229,7 +250,7 @@ class MainWindow(QMainWindow):
 
         dir_path: str = self.ui.line_edit_dir_path.text()
         if not dir_path or not os.path.exists(dir_path):
-            QMessageBox.information(self, "Info", "Choose dir path!")
+            QMessageBox.information(self, "Info", "Choose directory path!")
             return
 
         filter_size: str = self.ui.line_edit_filter.text()
@@ -270,9 +291,7 @@ class MainWindow(QMainWindow):
             self.ui.line_edit_dir_path.setEnabled(True)
             self.ui.line_edit_filter.setEnabled(True)
 
-            QMessageBox.information(
-                self, "Info", f"Done!\n\nElapsed time {t:.2f} sec."
-            )
+            QMessageBox.information(self, "Info", f"Done!\n\nElapsed time {t:.2f} sec.")
 
     def dir_size_bytes(
         self,
@@ -281,6 +300,25 @@ class MainWindow(QMainWindow):
         filter_size: str,
         level: int = 0,
     ) -> int:
+        path_short_name = os.path.split(dir_path)
+        path_short_name = (
+            path_short_name[1] if path_short_name[1] else path_short_name[0]
+        )
+
+        item_name = QStandardItem(path_short_name)
+        item_name.setEditable(False)
+
+        item_size = QStandardItem("-")
+        item_size.setEditable(False)
+
+        item_name.setData(dir_path, RowDataEnum.PATH.value)
+        item_name.setData(-1, RowDataEnum.SIZE_BYTES.value)
+        item_name.setData("-1", RowDataEnum.SIZE_HUMAN.value)
+
+        root_item.appendRow([item_name, item_size])
+
+        sizes: int = 0
+
         # TODO: Брать из dierctory_sizes.py
         try:
             # NOTE: AllEntries = Dirs | Files | Drives
@@ -295,40 +333,26 @@ class MainWindow(QMainWindow):
 
         it = QDirIterator(dir_path, filters)
 
-        sizes: int = 0
-
-        path_short_name = os.path.split(dir_path)
-        path_short_name = (
-            path_short_name[1] if path_short_name[1] else path_short_name[0]
-        )
-        row = [QStandardItem(path_short_name), QStandardItem("-")]
-
-        row[0].setData(dir_path)
-        row[1].setText("-")
-        row[1].setData("-")
-
-        row[0].setEditable(False)
-        row[1].setEditable(False)
-
-        root_item.appendRow(row)
-
         while it.hasNext():
-            file_name = it.next()
+            file_name: str = it.next()
             file = QFileInfo(file_name)
 
             if file.isDir():
-                size = self.dir_size_bytes(file_name, row[0], filter_size, level + 1)
+                size: int = self.dir_size_bytes(
+                    file_name, item_name, filter_size, level + 1
+                )
             else:
-                size = file.size()
+                size: int = file.size()
 
             sizes += size
 
             QApplication.instance().processEvents()
 
         text_size: str = pretty_file_size(sizes)
-        row[1].setText(text_size)
-        row[1].setData(text_size)
-        row[1].setData(str(sizes), Qt_UserRole + 2)  # TODO: Qt_UserRole в enum?
+        item_size.setText(text_size)
+
+        item_name.setData(sizes, RowDataEnum.SIZE_BYTES.value)
+        item_name.setData(text_size, RowDataEnum.SIZE_HUMAN.value)
 
         return sizes
 
