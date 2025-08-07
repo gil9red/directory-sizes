@@ -21,6 +21,7 @@ try:
         QToolBar,
         QFileDialog,
         QMessageBox,
+        QProgressBar,
     )
     from PyQt6.QtCore import QSettings, Qt, QDir, QDirIterator, QFileInfo, QModelIndex
 except ImportError as e:
@@ -33,6 +34,7 @@ except ImportError as e:
             QToolBar,
             QFileDialog,
             QMessageBox,
+            QProgressBar,
         )
         from PyQt5.QtCore import (
             QSettings,
@@ -52,6 +54,7 @@ except ImportError as e:
             QStandardItem,
             QFileDialog,
             QMessageBox,
+            QProgressBar,
         )
         from PyQt4.QtCore import (
             QSettings,
@@ -159,6 +162,11 @@ class MainWindow(QMainWindow):
 
         self.ui.action_apply_filter.setEnabled(False)
         self.ui.action_show_in_explorer.setEnabled(False)
+
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 0)
+        self.progress_bar.hide()
+        self.ui.statusbar.addPermanentWidget(self.progress_bar)
 
         self.read_settings()
 
@@ -274,6 +282,8 @@ class MainWindow(QMainWindow):
             self.ui.line_edit_dir_path.setEnabled(False)
             self.ui.line_edit_filter.setEnabled(False)
 
+            self.progress_bar.show()
+
             # Соберем список папок
             for path in dir_path.iterdir():
                 if path.is_dir():
@@ -291,6 +301,8 @@ class MainWindow(QMainWindow):
             self.ui.action_go.setEnabled(True)
             self.ui.line_edit_dir_path.setEnabled(True)
             self.ui.line_edit_filter.setEnabled(True)
+
+            self.progress_bar.hide()
 
             QMessageBox.information(self, "Info", f"Done!\n\nElapsed time {t:.2f} sec.")
 
