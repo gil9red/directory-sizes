@@ -6,10 +6,11 @@ __author__ = "ipetrash"
 
 import enum
 import os
-import os.path
 import re
 import sys
 import time
+
+from pathlib import Path
 
 try:
     from PyQt6.QtGui import QStandardItemModel, QStandardItem
@@ -248,9 +249,14 @@ class MainWindow(QMainWindow):
     def fill(self):
         self.clear_model()
 
-        dir_path: str = self.ui.line_edit_dir_path.text()
-        if not dir_path or not os.path.exists(dir_path):
+        dir_path_value: str = self.ui.line_edit_dir_path.text()
+        if not dir_path_value:
             QMessageBox.information(self, "Info", "Choose directory path!")
+            return
+
+        dir_path: Path = Path(dir_path_value).resolve()
+        if not dir_path.exists():
+            QMessageBox.information(self, "Info", "Directory not found!")
             return
 
         filter_size: str = self.ui.line_edit_filter.text()
@@ -261,7 +267,7 @@ class MainWindow(QMainWindow):
 
         t: float = time.perf_counter()
         try:
-            self.ui.label_root_dir.setText(dir_path)
+            self.ui.label_root_dir.setText(str(dir_path))
 
             self.ui.action_go.setEnabled(False)
             self.ui.action_show_in_explorer.setEnabled(False)
@@ -269,14 +275,9 @@ class MainWindow(QMainWindow):
             self.ui.line_edit_filter.setEnabled(False)
 
             # Соберем список папок
-            dir_list: list[str] = [
-                os.path.join(dir_path, entry)
-                for entry in os.listdir(dir_path)
-                if os.path.isdir(os.path.join(dir_path, entry))
-            ]
-
-            for entry in dir_list:
-                self.dir_size_bytes(entry, self.model.invisibleRootItem(), filter_size)
+            for path in dir_path.iterdir():
+                if path.is_dir():
+                    self.dir_size_bytes(str(path), self.model.invisibleRootItem(), filter_size)
 
             self.ui.action_apply_filter.setEnabled(True)
 
@@ -300,10 +301,7 @@ class MainWindow(QMainWindow):
         filter_size: str,
         level: int = 0,
     ) -> int:
-        path_short_name = os.path.split(dir_path)
-        path_short_name = (
-            path_short_name[1] if path_short_name[1] else path_short_name[0]
-        )
+        path_short_name: str = Path(dir_path).name
 
         item_name = QStandardItem(path_short_name)
         item_name.setEditable(False)
