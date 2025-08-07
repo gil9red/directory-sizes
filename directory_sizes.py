@@ -26,7 +26,7 @@ def dir_size_bytes(
     dirs: int = 0,
     level: int = 0,
     do_indent: bool = True,
-    size_less: float = get_bytes("1 GB"),
+    size_less: int = get_bytes("1 GB"),
 ) -> tuple[int, int, int]:
     try:
         filters = (
