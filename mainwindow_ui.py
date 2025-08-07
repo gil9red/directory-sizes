@@ -184,7 +184,7 @@ class Ui_MainWindow(object):
         self.dockWidgetSettings.setWindowTitle(
             _translate("MainWindow", "Settings", None)
         )
-        self.label.setText(_translate("MainWindow", "Dir:", None))
+        self.label.setText(_translate("MainWindow", "Directory:", None))
         self.line_edit_dir_path.setText(_translate("MainWindow", "C:\\", None))
         self.button_select_dir.setToolTip(_translate("MainWindow", "Select dir", None))
         self.button_select_dir.setText(_translate("MainWindow", "...", None))
