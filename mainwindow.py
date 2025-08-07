@@ -126,16 +126,21 @@ class MainWindow(QMainWindow):
 
         self.ui.treeView.setModel(self.model)
 
-        self.ui.treeView.clicked.connect(self.show_info_in_status_bar)
+        self.ui.treeView.clicked.connect(
+            lambda index: (
+                self.show_info_in_status_bar(index),
+                self.ui.action_show_in_explorer.setEnabled(True)
+            )
+        )
         self.ui.treeView.doubleClicked.connect(self.show_in_explorer)
 
         self.ui.button_select_dir.clicked.connect(self.select_dir)
         self.ui.action_go.triggered.connect(self.fill)
-        self.ui.action_show_in_explorer.triggered.connect(self.show_in_explorer)
+        self.ui.action_show_in_explorer.triggered.connect(lambda: self.show_in_explorer())
         self.ui.action_apply_filter.triggered.connect(self.slot_remove_dirs)
-        self.ui.label_root_dir.setText(self.ui.line_edit_dir_path.text())
 
         self.ui.action_apply_filter.setEnabled(False)
+        self.ui.action_show_in_explorer.setEnabled(False)
 
         self.read_settings()
 
@@ -187,8 +192,14 @@ class MainWindow(QMainWindow):
         path, size = row
 
         # TODO: Лучше дать конкретные константные имена, чем так: Qt.UserRole + 1 / Qt.UserRole + 2
+        dir_path: str = QDir.toNativeSeparators(
+            path.data(Qt_UserRole + 1)
+        )
+        size_human: str = size.data(Qt_UserRole + 1)
+        size_bytes: int = size.data(Qt_UserRole + 2)
+
         self.ui.statusbar.showMessage(
-            f"{path.data(Qt_UserRole + 1)} ({size.data(Qt_UserRole + 1)} / {size.data(Qt_UserRole + 2)} bytes)"
+            f"{dir_path} ({size_human} / {size_bytes} bytes)"
         )
 
     def clear_model(self):
@@ -215,7 +226,6 @@ class MainWindow(QMainWindow):
         self.remove_dirs(self.model.invisibleRootItem())
 
     def fill(self):
-        self.ui.action_go.setEnabled(False)
         self.clear_model()
 
         dir_path: str = self.ui.line_edit_dir_path.text()
@@ -231,6 +241,13 @@ class MainWindow(QMainWindow):
 
         t: float = time.perf_counter()
         try:
+            self.ui.label_root_dir.setText(dir_path)
+
+            self.ui.action_go.setEnabled(False)
+            self.ui.action_show_in_explorer.setEnabled(False)
+            self.ui.line_edit_dir_path.setEnabled(False)
+            self.ui.line_edit_filter.setEnabled(False)
+
             # Соберем список папок
             dir_list: list[str] = [
                 os.path.join(dir_path, entry)
@@ -251,6 +268,9 @@ class MainWindow(QMainWindow):
             logger.debug("Done! Elapsed time {:.2f} sec.".format(t))
 
             self.ui.action_go.setEnabled(True)
+            self.ui.line_edit_dir_path.setEnabled(True)
+            self.ui.line_edit_filter.setEnabled(True)
+
             QMessageBox.information(
                 self, "Info", "Done!\n\nElapsed time {:.2f} sec.".format(t)
             )
@@ -262,8 +282,6 @@ class MainWindow(QMainWindow):
         filter_size: str,
         level: int = 0,
     ) -> int:
-        dir_path = QDir.toNativeSeparators(dir_path)
-
         # TODO: Брать из dierctory_sizes.py
         try:
             # NOTE: AllEntries = Dirs | Files | Drives
