@@ -191,7 +191,6 @@ class MainWindow(QMainWindow):
 
         path, size = row
 
-        # TODO: Лучше дать конкретные константные имена, чем так: Qt.UserRole + 1 / Qt.UserRole + 2
         dir_path: str = QDir.toNativeSeparators(
             path.data(Qt_UserRole + 1)
         )
@@ -265,14 +264,14 @@ class MainWindow(QMainWindow):
                 self.ui.action_apply_filter.setEnabled(False)
         finally:
             t = time.perf_counter() - t
-            logger.debug("Done! Elapsed time {:.2f} sec.".format(t))
+            logger.debug(f"Done! Elapsed time {t:.2f} sec.")
 
             self.ui.action_go.setEnabled(True)
             self.ui.line_edit_dir_path.setEnabled(True)
             self.ui.line_edit_filter.setEnabled(True)
 
             QMessageBox.information(
-                self, "Info", "Done!\n\nElapsed time {:.2f} sec.".format(t)
+                self, "Info", f"Done!\n\nElapsed time {t:.2f} sec."
             )
 
     def dir_size_bytes(
