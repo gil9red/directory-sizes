@@ -9,13 +9,7 @@ import sys
 
 from common import log
 
-try:
-    from PyQt6.QtWidgets import QApplication, QMessageBox
-except ImportError:
-    try:
-        from PyQt5.QtWidgets import QApplication, QMessageBox
-    except ImportError:
-        from PyQt4.QtGui import QApplication, QMessageBox
+from PyQt6.QtWidgets import QApplication, QMessageBox
 
 
 def log_uncaught_exceptions(ex_cls, ex, tb):

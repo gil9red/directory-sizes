@@ -5,15 +5,7 @@ __author__ = "ipetrash"
 
 
 import os.path
-
-try:
-    from PyQt6.QtCore import QDir, QDirIterator, QFileInfo
-except ImportError:
-    try:
-        from PyQt5.QtCore import QDir, QDirIterator, QFileInfo
-    except ImportError:
-        from PyQt4.QtCore import QDir, QDirIterator, QFileInfo
-
+from PyQt6.QtCore import QDir, QDirIterator, QFileInfo
 from common import get_logger, get_bytes, pretty_file_size
 
 
@@ -28,16 +20,13 @@ def dir_size_bytes(
     do_indent: bool = True,
     size_less: int = get_bytes("1 GB"),
 ) -> tuple[int, int, int]:
-    try:
-        filters = (
-            # NOTE: AllEntries = Dirs | Files | Drives
-            QDir.Filter.AllEntries
-            | QDir.Filter.NoDotAndDotDot
-            | QDir.Filter.Hidden
-            | QDir.Filter.System
-        )
-    except:
-        filters = QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System
+    filters = (
+        # NOTE: AllEntries = Dirs | Files | Drives
+        QDir.Filter.AllEntries
+        | QDir.Filter.NoDotAndDotDot
+        | QDir.Filter.Hidden
+        | QDir.Filter.System
+    )
 
     it = QDirIterator(dir_path, filters)
 

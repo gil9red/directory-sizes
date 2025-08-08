@@ -12,65 +12,17 @@ import time
 
 from pathlib import Path
 
-try:
-    from PyQt6.QtGui import QStandardItemModel, QStandardItem
-    from PyQt6.QtWidgets import (
-        QApplication,
-        QMainWindow,
-        QDockWidget,
-        QToolBar,
-        QFileDialog,
-        QMessageBox,
-        QProgressBar,
-    )
-    from PyQt6.QtCore import QSettings, Qt, QDir, QDirIterator, QFileInfo, QModelIndex
-except ImportError as e:
-    try:
-        from PyQt5.QtGui import QStandardItemModel, QStandardItem
-        from PyQt5.QtWidgets import (
-            QApplication,
-            QMainWindow,
-            QDockWidget,
-            QToolBar,
-            QFileDialog,
-            QMessageBox,
-            QProgressBar,
-        )
-        from PyQt5.QtCore import (
-            QSettings,
-            Qt,
-            QDir,
-            QDirIterator,
-            QFileInfo,
-            QModelIndex,
-        )
-    except ImportError:
-        from PyQt4.QtGui import (
-            QApplication,
-            QMainWindow,
-            QDockWidget,
-            QToolBar,
-            QStandardItemModel,
-            QStandardItem,
-            QFileDialog,
-            QMessageBox,
-            QProgressBar,
-        )
-        from PyQt4.QtCore import (
-            QSettings,
-            Qt,
-            QDir,
-            QDirIterator,
-            QFileInfo,
-            QModelIndex,
-        )
-
-try:
-    QSettings_IniFormat = QSettings.Format.IniFormat
-    Qt_UserRole = Qt.ItemDataRole.UserRole
-except:
-    QSettings_IniFormat = QSettings.IniFormat
-    Qt_UserRole = Qt.UserRole
+from PyQt6.QtGui import QStandardItemModel, QStandardItem
+from PyQt6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QDockWidget,
+    QToolBar,
+    QFileDialog,
+    QMessageBox,
+    QProgressBar,
+)
+from PyQt6.QtCore import QSettings, Qt, QDir, QDirIterator, QFileInfo, QModelIndex
 
 from mainwindow_ui import Ui_MainWindow
 
@@ -118,9 +70,9 @@ class ColumnEnum(enum.Enum):
 
 
 class RowDataEnum(enum.Enum):
-    PATH = Qt_UserRole + 1
-    SIZE_BYTES = Qt_UserRole + 2
-    SIZE_HUMAN = Qt_UserRole + 3
+    PATH = Qt.ItemDataRole.UserRole + 1
+    SIZE_BYTES = Qt.ItemDataRole.UserRole + 2
+    SIZE_HUMAN = Qt.ItemDataRole.UserRole + 3
 
 
 class MainWindow(QMainWindow):
@@ -331,16 +283,13 @@ class MainWindow(QMainWindow):
         sizes: int = 0
 
         # TODO: Адаптировать код из directory_sizes.py для использования в этом модуле
-        try:
+        filters = (
             # NOTE: AllEntries = Dirs | Files | Drives
-            filters = (
-                QDir.Filter.AllEntries
-                | QDir.Filter.NoDotAndDotDot
-                | QDir.Filter.Hidden
-                | QDir.Filter.System
-            )
-        except:
-            filters = QDir.AllEntries | QDir.NoDotAndDotDot | QDir.Hidden | QDir.System
+            QDir.Filter.AllEntries
+            | QDir.Filter.NoDotAndDotDot
+            | QDir.Filter.Hidden
+            | QDir.Filter.System
+        )
 
         it = QDirIterator(dir_path, filters)
 
@@ -366,7 +315,7 @@ class MainWindow(QMainWindow):
         return sizes
 
     def read_settings(self):
-        config = QSettings(CONFIG_FILE, QSettings_IniFormat)
+        config = QSettings(CONFIG_FILE, QSettings.Format.IniFormat)
         mainwindow_state = config.value("MainWindow_State")
         if mainwindow_state:
             self.restoreState(mainwindow_state)
@@ -390,7 +339,7 @@ class MainWindow(QMainWindow):
         )
 
     def write_settings(self):
-        config = QSettings(CONFIG_FILE, QSettings_IniFormat)
+        config = QSettings(CONFIG_FILE, QSettings.Format.IniFormat)
         config.setValue("MainWindow_State", self.saveState())
         config.setValue("MainWindow_Geometry", self.saveGeometry())
 
