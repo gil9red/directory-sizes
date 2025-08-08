@@ -74,7 +74,7 @@ except:
 
 from mainwindow_ui import Ui_MainWindow
 
-from common import get_bytes, pretty_file_size, logger
+from common import get_bytes, pretty_file_size, get_default_path, log
 from config import CONFIG_FILE
 
 
@@ -90,8 +90,8 @@ def check_filter_size_eval(pattern: str, size_bytes: int) -> bool:
     :type size_bytes: размер в байтах, который будет подставляться в {size} pattern. Целое число.
     """
 
-    logger.debug("Pattern: %s.", pattern)
-    logger.debug("Size: %s bytes.", size_bytes)
+    log.debug("Pattern: %s.", pattern)
+    log.debug("Size: %s bytes.", size_bytes)
 
     pattern: str = re.sub(
         r"%(.+?)%",
@@ -100,10 +100,10 @@ def check_filter_size_eval(pattern: str, size_bytes: int) -> bool:
     )
 
     source: str = pattern.format(size=size_bytes)
-    logger.debug("After replace. Source eval: %s.", source)
+    log.debug("After replace. Source eval: %s.", source)
 
     result: bool = eval(source)
-    logger.debug("Result eval: %s.", result)
+    log.debug("Result eval: %s.", result)
 
     return result
 
@@ -197,7 +197,7 @@ class MainWindow(QMainWindow):
         index: QModelIndex | None = None,
     ) -> tuple[QStandardItem, QStandardItem] | None:
         if index is None or not index.isValid:
-            logger.warn("get_row_from_index: invalid index: %s.", index)
+            log.warn("get_row_from_index: invalid index: %s.", index)
             return
 
         row = index.row()
@@ -269,9 +269,9 @@ class MainWindow(QMainWindow):
 
         filter_size: str = self.ui.line_edit_filter.text()
         if not filter_size:
-            logger.debug("filter_size is empty. Setting default filter_size.")
+            log.debug("filter_size is empty. Setting default filter_size.")
             filter_size = "{size} >= %1GB%"
-            logger.debug("filter_size: %s.", filter_size)
+            log.debug("filter_size: %s.", filter_size)
 
         t: float = time.perf_counter()
         try:
@@ -296,7 +296,7 @@ class MainWindow(QMainWindow):
                 self.ui.action_apply_filter.setEnabled(False)
         finally:
             t = time.perf_counter() - t
-            logger.debug(f"Done! Elapsed time {t:.2f} sec.")
+            log.debug(f"Done! Elapsed time {t:.2f} sec.")
 
             self.ui.action_go.setEnabled(True)
             self.ui.line_edit_dir_path.setEnabled(True)

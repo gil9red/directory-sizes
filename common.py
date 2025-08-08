@@ -4,6 +4,7 @@
 __author__ = "ipetrash"
 
 
+import os.path
 import sys
 import logging
 
@@ -90,7 +91,12 @@ def pretty_file_size(n_size: int) -> str:
     return f"{size:.2f} {'BKMGTPE'[i]}{('B' if i > 0 else '')}"
 
 
-logger = get_logger("directory_sizes_gui")
+def get_default_path() -> str:
+    # На Windows будет с диском, например, 'C:\\', а на линуксе '/'
+    return os.path.abspath(os.sep)
+
+
+log = get_logger("directory_sizes_gui")
 
 
 if __name__ == "__main__":

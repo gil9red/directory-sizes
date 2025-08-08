@@ -71,8 +71,9 @@ def dir_size_bytes(
 
 if __name__ == "__main__":
     import time
+    from common import get_default_path
 
-    dir_name = r"C:\\"
+    dir_name: str = get_default_path()
 
     t = time.perf_counter()
     sizes, files, dirs = dir_size_bytes(

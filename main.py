@@ -7,7 +7,7 @@ __author__ = "ipetrash"
 import traceback
 import sys
 
-from common import logger
+from common import log
 
 try:
     from PyQt6.QtWidgets import QApplication, QMessageBox
@@ -22,7 +22,7 @@ def log_uncaught_exceptions(ex_cls, ex, tb):
     text = f"{ex_cls.__name__}: {ex}:\n"
     text += "".join(traceback.format_tb(tb))
 
-    logger.error(text)
+    log.error(text)
 
     if QApplication.instance():
         QMessageBox.critical(None, "Error", text)
