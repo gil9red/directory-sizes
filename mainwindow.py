@@ -376,14 +376,14 @@ class MainWindow(QMainWindow):
         if mainwindow_geometry:
             self.restoreGeometry(mainwindow_geometry)
 
-        dir_path = config.value("Dir_path", None)
+        dir_path: str | None = config.value("Dir_path", None)
         if not dir_path:
-            dir_path = "C:\\"
+            dir_path: str = get_default_path()
         self.ui.line_edit_dir_path.setText(dir_path)
 
-        filter_size = config.value("Filter_size", None)
+        filter_size: str | None = config.value("Filter_size", None)
         if not filter_size:
-            filter_size = "{size} >= %1GB%"
+            filter_size: str = "{size} >= %1GB%"
         self.ui.line_edit_filter.setText(filter_size)
 
         self.ui.check_box_auto_apply_filter.setChecked(
