@@ -287,7 +287,9 @@ class MainWindow(QMainWindow):
             # Соберем список папок
             for path in dir_path.iterdir():
                 if path.is_dir():
-                    self.dir_size_bytes(str(path), self.model.invisibleRootItem(), filter_size)
+                    self.dir_size_bytes(
+                        str(path), self.model.invisibleRootItem(), filter_size
+                    )
 
             self.ui.action_apply_filter.setEnabled(True)
 
@@ -311,7 +313,6 @@ class MainWindow(QMainWindow):
         dir_path: str,
         root_item: QStandardItem,
         filter_size: str,
-        level: int = 0,
     ) -> int:
         path_short_name: str = Path(dir_path).name
 
@@ -329,7 +330,7 @@ class MainWindow(QMainWindow):
 
         sizes: int = 0
 
-        # TODO: Брать из dierctory_sizes.py
+        # TODO: Адаптировать код из directory_sizes.py для использования в этом модуле
         try:
             # NOTE: AllEntries = Dirs | Files | Drives
             filters = (
@@ -348,9 +349,7 @@ class MainWindow(QMainWindow):
             file = QFileInfo(file_name)
 
             if file.isDir():
-                size: int = self.dir_size_bytes(
-                    file_name, item_name, filter_size, level + 1
-                )
+                size: int = self.dir_size_bytes(file_name, item_name, filter_size)
             else:
                 size: int = file.size()
 
