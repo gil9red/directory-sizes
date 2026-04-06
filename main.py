@@ -7,9 +7,9 @@ __author__ = "ipetrash"
 import traceback
 import sys
 
-from common import log
-
 from PyQt6.QtWidgets import QApplication, QMessageBox
+
+from common import log
 
 
 def log_uncaught_exceptions(ex_cls, ex, tb):
