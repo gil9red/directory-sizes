@@ -5,8 +5,10 @@ __author__ = "ipetrash"
 
 
 import os.path
+
 from PyQt6.QtCore import QDir, QDirIterator, QFileInfo
-from common import get_logger, get_bytes, pretty_file_size
+
+from directory_sizes.common import get_logger, get_bytes, pretty_file_size
 
 
 logger = get_logger("dir_sizes")

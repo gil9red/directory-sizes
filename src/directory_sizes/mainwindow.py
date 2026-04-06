@@ -24,10 +24,9 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import QSettings, Qt, QDir, QDirIterator, QFileInfo, QModelIndex
 
-from mainwindow_ui import Ui_MainWindow
-
-from common import get_bytes, pretty_file_size, get_default_path, log
-from config import CONFIG_FILE
+from directory_sizes.mainwindow_ui import Ui_MainWindow
+from directory_sizes.common import get_bytes, pretty_file_size, get_default_path, log
+from directory_sizes.config import CONFIG_FILE
 
 
 # TODO: проверка на исключения: должны ловиться в любом месте и показываться в статус баре по кнопке и

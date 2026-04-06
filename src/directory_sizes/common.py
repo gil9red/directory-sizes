@@ -11,7 +11,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-import config
+from directory_sizes import config
 
 
 def get_logger(file_name: str, dir_name: Path = config.DIR / "logs") -> logging.Logger:

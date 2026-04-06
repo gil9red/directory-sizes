@@ -9,7 +9,7 @@ import sys
 
 from PyQt6.QtWidgets import QApplication, QMessageBox
 
-from common import log
+from directory_sizes.common import log
 
 
 def log_uncaught_exceptions(ex_cls, ex, tb):
@@ -26,7 +26,7 @@ def log_uncaught_exceptions(ex_cls, ex, tb):
 
 sys.excepthook = log_uncaught_exceptions
 
-from mainwindow import MainWindow
+from directory_sizes.mainwindow import MainWindow
 
 
 if __name__ == "__main__":
@@ -35,4 +35,4 @@ if __name__ == "__main__":
     mw = MainWindow()
     mw.show()
 
-    app.exec()
+    sys.exit(app.exec())
