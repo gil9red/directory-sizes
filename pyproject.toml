@@ -11,7 +11,7 @@ dependencies = [
     "pyqt6==6.9.1",
 ]
 
-[project.scripts]
+[project.gui-scripts]
 directory-sizes = "directory_sizes.main:main"
 
 [build-system]
