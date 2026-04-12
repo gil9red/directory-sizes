@@ -24,6 +24,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import QSettings, Qt, QDir, QDirIterator, QFileInfo, QModelIndex
 
+from directory_sizes import __version__
 from directory_sizes.mainwindow_ui import Ui_MainWindow
 from directory_sizes.common import get_bytes, pretty_file_size, get_default_path, log
 from directory_sizes.config import CONFIG_FILE
@@ -80,6 +81,8 @@ class MainWindow(QMainWindow):
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.setWindowTitle(f"{self.windowTitle()} (v{__version__})")
 
         # Все действия к прикрепляемым окнам поместим в меню
         for dock in self.findChildren(QDockWidget):

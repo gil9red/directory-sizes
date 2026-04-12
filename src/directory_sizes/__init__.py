@@ -2,4 +2,4 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "ipetrash"
-__version__ = "2026.04.06"
+__version__ = "2026.4.12"

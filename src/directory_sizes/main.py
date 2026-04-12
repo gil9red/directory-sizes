@@ -26,13 +26,17 @@ def log_uncaught_exceptions(ex_cls, ex, tb):
 
 sys.excepthook = log_uncaught_exceptions
 
-from directory_sizes.mainwindow import MainWindow
+from directory_sizes.mainwindow import MainWindow  # noqa: E402
 
 
-if __name__ == "__main__":
+def main() -> None:
     app = QApplication([])
 
     mw = MainWindow()
     mw.show()
 
     sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()

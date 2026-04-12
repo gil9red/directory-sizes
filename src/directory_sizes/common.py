@@ -50,7 +50,7 @@ def get_bytes(text: str, units: str = "BKMGTPE") -> int:
     # а только превращаем в число и возвращаем
     try:
         return int(float(text))
-    except:
+    except ValueError:
         pass
 
     text = text.strip().replace(" ", "").replace(",", ".")
@@ -61,7 +61,7 @@ def get_bytes(text: str, units: str = "BKMGTPE") -> int:
         # Если ошибок не случится, значит получили байты (предположительно),
         # Это может быть строка: "766.00 B"
         return int(float(text))
-    except:
+    except ValueError:
         pass
 
     # NOTE: For '54.7G' -> num='54.7' and unit='G'

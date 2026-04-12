@@ -1,0 +1,25 @@
+[project]
+name = "directory-sizes"
+dynamic = ["version"]
+description = "Show directory sizes"
+readme = "README.md"
+authors = [
+    { name = "gil9red", email = "ilya.petrash@inbox.ru" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pyqt6==6.9.1",
+]
+
+[project.scripts]
+directory-sizes = "directory_sizes.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/directory_sizes/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/directory_sizes"]
