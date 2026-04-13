@@ -10,6 +10,8 @@ requires-python = ">=3.10"
 dependencies = [
     "pyqt6==6.9.1",
 ]
+license = "MIT"
+license-files = ["LICENSE.txt"]
 
 [project.gui-scripts]
 directory-sizes = "directory_sizes.main:main"
