@@ -2,7 +2,6 @@
 name = "directory-sizes"
 dynamic = ["version"]
 description = "Show directory sizes"
-readme = "README.md"
 authors = [
     { name = "gil9red", email = "ilya.petrash@inbox.ru" }
 ]
@@ -10,6 +9,7 @@ requires-python = ">=3.10"
 dependencies = [
     "pyqt6==6.9.1",
 ]
+readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE.txt"]
 
